@@ -11,13 +11,18 @@ class Component {
         this.elem = document.querySelector("main");
         this.Auth = new Auth();
         this.Main = new Main();
+        this.state = {
+            target: "main",
+            auth: "no",
+            href: "main.html",
+        };
 
         this.settebleEvents = []; //
         this.start();
     }
 
     start() {
-        this.setState(this.getStorageState()); // получаем последнее состояние приложения из хранилища
+        // this.setState(this.getStorageState()); // получаем последнее состояние приложения из хранилища
         this.changePage(); // подгружаем контент
         this.setLinkEvents();
         this.setUrlEvents();
@@ -34,6 +39,7 @@ class Component {
 
     getStorageState() {
         let state = this.state;
+        console.log(localStorage.length && localStorage.state != "null");
         if (localStorage.length && localStorage.state != "null") state = JSON.parse( localStorage.state );
         return state;
     }

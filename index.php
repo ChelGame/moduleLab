@@ -7,12 +7,7 @@
         <link type="image/x-icon" href="./img/icon.ico">
         <link rel="stylesheet" href="./css/index.css">
         <link rel="stylesheet" href="./css/media.css">
-        <!-- <script type="module" defer src="./js/index.js"></script> -->
         <script type="module" defer src="./App/App.js"></script>
-        <script
-  src="https://code.jquery.com/jquery-3.6.4.min.js"
-  integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8="
-  crossorigin="anonymous"></script>
     </head>
     <body>
         <header>
@@ -25,11 +20,12 @@
             <section class="navigation_container">
                 <nav>
                     <ul>
-                        <li><a data-link="true" href="/auth.html">Войти</a></li>
                         <li hidden><a href="#">Выйти</a></li>
-                        <li><a data-link="true" href="/main.html">Главная</a></li>
-                        <li><a data-link="true" href="/agents.html" >Наши сотрудники</a></li>
-                        <li><a data-link="true" href="/articles.html" >Публикации</a></li>
+                        <li><a data-historyLink href="/auth">Войти</a></li>
+                        <li><a data-historyLink href="/register">Регистрация</a></li>
+                        <li><a data-historyLink href="/main">Главная</a></li>
+                        <li hidden><a data-historyLink href="/agents">Наши сотрудники</a></li>
+                        <li><a data-historyLink href="/articles">Публикации</a></li>
                     </ul>
                 </nav>
             </section>
@@ -46,11 +42,12 @@
             <section class="navigation_container">
                 <nav>
                     <ul>
-                        <li><a data-link="true" href="/auth.html">Войти</a></li>
                         <li hidden><a href="#">Выйти</a></li>
-                        <li><a data-link="true" href="/main.html" >Главная</a></li>
-                        <li><a data-link="true" href="/agents.html" >Наши сотрудники</a></li>
-                        <li><a data-link="true" href="/articles.html" >Публикации</a></li>
+                        <li><a data-historyLink href="/auth">Войти</a></li>
+                        <li><a data-historyLink href="/register">Регистрация</a></li>
+                        <li><a data-historyLink href="/main" >Главная</a></li>
+                        <li hidden><a data-historyLink href="/agents" >Наши сотрудники</a></li>
+                        <li><a data-historyLink href="/articles" >Публикации</a></li>
                     </ul>
                 </nav>
             </section>
