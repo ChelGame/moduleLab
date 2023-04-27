@@ -35,7 +35,7 @@ export default class HTMLEditor {
             'link',
             'meta',
             'param',
-        ]
+        ];
     }
     reset (html) {
         this.html = html;
@@ -139,7 +139,8 @@ export default class HTMLEditor {
                 }
                 this.state = 'rTex';
                 this.text = '';
-                this.paramVal = this.paramVal || true;
+                // this.paramVal = this.paramVal;
+                // this.paramVal = this.paramVal || true;
                 if (this.paramKey) {
                     this.elem.params[this.paramKey] = this.paramVal;
                 }
@@ -154,7 +155,7 @@ export default class HTMLEditor {
                 if (this.state === 'rPar') {
 
                     if (this.paramFlag) {
-                        this.paramVal = this.paramVal || true;
+                        // this.paramVal = this.paramVal || true;
                         if (this.paramKey) {
                             this.elem.params[this.paramKey] = this.paramVal;
                         }
