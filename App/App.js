@@ -43,7 +43,6 @@ class App {
             url: "/main",
             auth: false,
         };
-
         return this.getStateFromStorage() || this.getStateFromHistory() || initialState;
     }
 
@@ -53,6 +52,7 @@ class App {
     }
 
     getStateFromHistory() {
+        if (!window.history || !window.history.state) return null;
         return window.history.state["AppState"];
     }
 
@@ -200,6 +200,7 @@ class App {
 
     // Метод под вопросом
     render(content) {
+        this.self.innerHTML = "";
         this.self.append(content);
     }
 }

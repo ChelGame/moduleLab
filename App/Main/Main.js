@@ -1,7 +1,9 @@
-
+import HTMLEditor from "/App/utils/HTMLEditor.js";
 
 class Main {
     constructor() {
+        this.self = document.createElement("div");
+        this.self.classList.add("Main_component");
         this.html = `
         <div class="fixed_container">
             <section class="about_container">
@@ -69,10 +71,21 @@ class Main {
         </div>
 
         `;
+        this.editor = new HTMLEditor(this.html);
+
+        this.ComponentStart();
+    }
+
+    ComponentStart() {
+        // В HTMLEditor лучше не лезть без особой необходимости. Писал я его давно.
+        // Причем так, чтобы не пришлось лезть.
+        // В начале файла есть комент с алгоритмом использование
+        this.components = this.editor.HTMLParser();
+        this.editor.HTMLPrinter(this.self);
     }
 
     getContent() {
-        return this.html;
+        return this.self;
     }
 }
 
