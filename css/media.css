@@ -1,0 +1,20 @@
+@media (max-width: 1024px) {
+    .fixed_container {
+        max-width: 620px;
+    }
+}
+
+@media (max-width: 700px) {
+    * {
+        font-size: 12px;
+    }
+
+    .page_container {
+        text-align: center;
+        font-size: 16px;
+    }
+
+    .logo_container {
+        display: none;
+    }
+}

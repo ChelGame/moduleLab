@@ -43,7 +43,10 @@ class App {
             url: "/main",
             auth: false,
         };
+<<<<<<< HEAD
 
+=======
+>>>>>>> 9b948e8de7ba9e4fb710e6e6f2da2caf82a91f4d
         return this.getStateFromStorage() || this.getStateFromHistory() || initialState;
     }
 
@@ -53,6 +56,10 @@ class App {
     }
 
     getStateFromHistory() {
+<<<<<<< HEAD
+=======
+        if (!window.history || !window.history.state) return null;
+>>>>>>> 9b948e8de7ba9e4fb710e6e6f2da2caf82a91f4d
         return window.history.state["AppState"];
     }
 
@@ -200,6 +207,10 @@ class App {
 
     // Метод под вопросом
     render(content) {
+<<<<<<< HEAD
+=======
+        this.self.innerHTML = "";
+>>>>>>> 9b948e8de7ba9e4fb710e6e6f2da2caf82a91f4d
         this.self.append(content);
     }
 }
