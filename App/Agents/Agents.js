@@ -6,21 +6,69 @@ class Agents {
         this.self.classList.add("Agents_component");
         this.html = `
         <section class="agents_container">
-            <ul>
-                <li>
-                    Сотрудник1
+            <ul class="list_agents">
+                <li class="item_agents">
+                    <p class="agent_name">ФИО: <span>Федоренко Павел Сергеевичь</span></p>
+                    <p class="agent_born-date">Дата рождения: <span>02.03.1974</span></p>
+                    <p class="agent_gender">Пол: <span>Мужской</span></p>
+                    <p class="agent_family-status">Семейное положение: <span>Не женат</span></p>
+                    <p class="agent_childs">Дети: <span>Нет</span></p>
+                    <p class="agent_post">Должность: <span>Старший научный сотрудник</span></p>
+                    <p class="agent_academic-degree">Академическая степень: <span>Доктор наук</span></p>
                 </li>
-                <li>
-                    Сотрудник2
+                <li class="item_agents">
+                    <p class="agent_name">ФИО: <span>Федоренко Павел Сергеевичь</span></p>
+                    <p class="agent_born-date">Дата рождения: <span>02.03.1974</span></p>
+                    <p class="agent_gender">Пол: <span>Мужской</span></p>
+                    <p class="agent_family-status">Семейное положение: <span>Не женат</span></p>
+                    <p class="agent_childs">Дети: <span>Нет</span></p>
+                    <p class="agent_post">Должность: <span>Старший научный сотрудник</span></p>
+                    <p class="agent_academic-degree">Академическая степень: <span>Доктор наук</span></p>
                 </li>
-                <li>
-                    Сотрудник3
+                <li class="item_agents">
+                    <p class="agent_name">ФИО: <span>Федоренко Павел Сергеевичь</span></p>
+                    <p class="agent_born-date">Дата рождения: <span>02.03.1974</span></p>
+                    <p class="agent_gender">Пол: <span>Мужской</span></p>
+                    <p class="agent_family-status">Семейное положение: <span>Не женат</span></p>
+                    <p class="agent_childs">Дети: <span>Нет</span></p>
+                    <p class="agent_post">Должность: <span>Старший научный сотрудник</span></p>
+                    <p class="agent_academic-degree">Академическая степень: <span>Доктор наук</span></p>
                 </li>
-                <li>
-                    Сотрудник4
+                <li class="item_agents">
+                    <p class="agent_name">ФИО: <span>Федоренко Павел Сергеевичь</span></p>
+                    <p class="agent_born-date">Дата рождения: <span>02.03.1974</span></p>
+                    <p class="agent_gender">Пол: <span>Мужской</span></p>
+                    <p class="agent_family-status">Семейное положение: <span>Не женат</span></p>
+                    <p class="agent_childs">Дети: <span>Нет</span></p>
+                    <p class="agent_post">Должность: <span>Старший научный сотрудник</span></p>
+                    <p class="agent_academic-degree">Академическая степень: <span>Доктор наук</span></p>
                 </li>
-                <li>
-                    Сотрудник5
+                <li class="item_agents">
+                    <p class="agent_name">ФИО: <span>Федоренко Павел Сергеевичь</span></p>
+                    <p class="agent_born-date">Дата рождения: <span>02.03.1974</span></p>
+                    <p class="agent_gender">Пол: <span>Мужской</span></p>
+                    <p class="agent_family-status">Семейное положение: <span>Не женат</span></p>
+                    <p class="agent_childs">Дети: <span>Нет</span></p>
+                    <p class="agent_post">Должность: <span>Старший научный сотрудник</span></p>
+                    <p class="agent_academic-degree">Академическая степень: <span>Доктор наук</span></p>
+                </li>
+                <li class="item_agents">
+                    <p class="agent_name">ФИО: <span>Федоренко Павел Сергеевичь</span></p>
+                    <p class="agent_born-date">Дата рождения: <span>02.03.1974</span></p>
+                    <p class="agent_gender">Пол: <span>Мужской</span></p>
+                    <p class="agent_family-status">Семейное положение: <span>Не женат</span></p>
+                    <p class="agent_childs">Дети: <span>Нет</span></p>
+                    <p class="agent_post">Должность: <span>Старший научный сотрудник</span></p>
+                    <p class="agent_academic-degree">Академическая степень: <span>Доктор наук</span></p>
+                </li>
+                <li class="item_agents">
+                    <p class="agent_name">ФИО: <span>Федоренко Павел Сергеевичь</span></p>
+                    <p class="agent_born-date">Дата рождения: <span>02.03.1974</span></p>
+                    <p class="agent_gender">Пол: <span>Мужской</span></p>
+                    <p class="agent_family-status">Семейное положение: <span>Не женат</span></p>
+                    <p class="agent_childs">Дети: <span>Нет</span></p>
+                    <p class="agent_post">Должность: <span>Старший научный сотрудник</span></p>
+                    <p class="agent_academic-degree">Академическая степень: <span>Доктор наук</span></p>
                 </li>
             </ul>
         </section>

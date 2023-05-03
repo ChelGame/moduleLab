@@ -24,7 +24,7 @@
                         <li><a data-historyLink href="/auth">Войти</a></li>
                         <li><a data-historyLink href="/register">Регистрация</a></li>
                         <li><a data-historyLink href="/main">Главная</a></li>
-                        <li hidden><a data-historyLink href="/agents">Наши сотрудники</a></li>
+                        <li ><a data-historyLink href="/agents">Наши сотрудники</a></li>
                         <li><a data-historyLink href="/articles">Публикации</a></li>
                     </ul>
                 </nav>

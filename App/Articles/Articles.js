@@ -4,21 +4,42 @@ class Articles {
     constructor() {
         this.self = document.createElement("div");
         this.self.classList.add("Articles_component");
+        this.self.classList.add("fixed_container");
         this.html = `
-        <section class="articles_container">
+        <section class="articles_container fixed_container">
             <nav>
-                <ul>
-                    <li>Предыдущая статья</li>
-                    <li>Следующая статья</li>
-                    <li>Оценить статью</li>
-                </ul>
+                <div class="search_con">
+                    <input class="search_input" type="text" name="searchArticles" value="" placeholder="Название или фраза">
+                    <button class="search_button" type="button" name="searchArticlesButton"></button>
+                </div>
+                <div class="button_group">
+                    <button class="prev" type="button" name="prevArticle"></button>
+                    <button class="read" type="button" name="readArticle"></button>
+                    <button class="next" type="button" name="nextArticle"></button>
+                </div>
+                <button type="button" name="showMenu">></button>
             </nav>
-            <ul>
-                <li>Статья1</li>
-                <li>Статья2</li>
-                <li>Статья3</li>
-                <li>Статья4</li>
-                <li>Статья5</li>
+            <ul class="list_article">
+                <li class="item_article">
+                    <h2>Квантование лазерных пучков и их синергетика с квантами нагретой плазмы</h2>
+                    <p>В статье разобраны базовые принципы квантования лазерных пучков в разных конфигурациях а также их синергии с нагретой плазмой</p>
+                </li>
+                <li class="item_article">
+                    <h2>Квантование лазерных пучков и их синергетика с квантами нагретой плазмы</h2>
+                    <p>В статье разобраны базовые принципы квантования лазерных пучков в разных конфигурациях а также их синергии с нагретой плазмой</p>
+                </li>
+                <li class="item_article">
+                    <h2>Квантование лазерных пучков и их синергетика с квантами нагретой плазмы</h2>
+                    <p>В статье разобраны базовые принципы квантования лазерных пучков в разных конфигурациях а также их синергии с нагретой плазмой</p>
+                </li>
+                <li class="item_article">
+                    <h2>Квантование лазерных пучков и их синергетика с квантами нагретой плазмы</h2>
+                    <p>В статье разобраны базовые принципы квантования лазерных пучков в разных конфигурациях а также их синергии с нагретой плазмой</p>
+                </li>
+                <li class="item_article">
+                    <h2>Квантование лазерных пучков и их синергетика с квантами нагретой плазмы</h2>
+                    <p>В статье разобраны базовые принципы квантования лазерных пучков в разных конфигурациях а также их синергии с нагретой плазмой</p>
+                </li>
             </ul>
         </section>
         `;

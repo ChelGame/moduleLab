@@ -1,16 +1,9 @@
-<<<<<<< HEAD
-
-
-class Main {
-    constructor() {
-=======
 import HTMLEditor from "/App/utils/HTMLEditor.js";
 
 class Main {
     constructor() {
         this.self = document.createElement("div");
         this.self.classList.add("Main_component");
->>>>>>> 9b948e8de7ba9e4fb710e6e6f2da2caf82a91f4d
         this.html = `
         <div class="fixed_container">
             <section class="about_container">
@@ -78,12 +71,6 @@ class Main {
         </div>
 
         `;
-<<<<<<< HEAD
-    }
-
-    getContent() {
-        return this.html;
-=======
         this.editor = new HTMLEditor(this.html);
 
         this.ComponentStart();
@@ -99,7 +86,6 @@ class Main {
 
     getContent() {
         return this.self;
->>>>>>> 9b948e8de7ba9e4fb710e6e6f2da2caf82a91f4d
     }
 }
 
