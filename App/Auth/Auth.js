@@ -1,4 +1,23 @@
 import HTMLEditor from "/App/utils/HTMLEditor.js";
+import Message from "/App/utils/Message.js";
+
+// Сегодня
+/* 1) Делаем вход (без реальной аутентификации и авторизации)
+    При отправке проверяем данные. Если все есть - "отправляем"
+    "Проверяем" результат и если все плохо - говорим об этом.
+    Если все хорошо - Перекидываем на главную и меняем состояние на вход и роль
+    От роли даем доступ. (Проверить, что нет способа получить доступ к запрещенным функциям)
+*/
+/* 2) Делаем Регистраию (Только до отправки данных и рекция на них)
+    При отправке проверяем данные. Если все есть - "отправляем"
+    "Проверяем" результат и если все плохо - говорим об этом.
+    Если все хорошо - Перекидываем на авторизацию.
+    (пока без капчи)
+*/
+/* 3) Делаем Базу данных
+    Заполняем ее тестовыми данными о сотрудниках, админе, паре сотрудников профкома и кадровиков.
+    Добавляем категории и таблицы по необходимости (скорее всего нужны будут направления (физики, математики и т.д.))
+*/
 
 class Auth {
     constructor() {
@@ -30,13 +49,14 @@ class Auth {
             </aside>
         </section>
         <section class="popUp_container disnone no_accept">
-            <aside class="popUp">
-                <h2>Вход не выполнен</h2>
+            <aside class="popUp" auth="yes">
+                <h2 id="auth">Вход не выполнен</h2>
             </aside>
         </section>
 
         `;
         this.editor = new HTMLEditor(this.html);
+        this.message = new Message();
 
         this.ComponentStart();
     }
@@ -47,6 +67,50 @@ class Auth {
         // В начале файла есть комент с алгоритмом использование
         this.components = this.editor.HTMLParser();
         this.editor.HTMLPrinter(this.self);
+        this.setAuthEvent();
+    }
+
+    async setAuthEvent() {
+        this.self.querySelector(".auth").addEventListener("submit", (event) => {
+            event.preventDefault();
+            this.authentification();
+        });
+    }
+
+    async authentification() {
+        const login = this.editor.findElementByParameter('[name="login"]').self.value;
+        const password = this.editor.findElementByParameter('[name="password"]').self.value;
+
+        if (!login || !password) {
+            const message = "Пропущен логин или пароль";
+            this.message.printMessage(message, 10000);
+            return false;
+        }
+
+        const url = "Auth.php";
+        const body = {
+            login,
+            password,
+        };
+        let response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8'
+            },
+            body: JSON.stringify(body),
+        });
+
+        let result = await response.text();
+        // let result = await response.json();
+        if (result.status) {
+            this.authorization(result);
+        } else {
+            this.message.printMessage("Проверьте правильность введенных данных");
+        }
+    }
+
+    authorization(data) {
+
     }
 
     getContent() {

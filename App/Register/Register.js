@@ -1,4 +1,12 @@
 import HTMLEditor from "/App/utils/HTMLEditor.js";
+import Message from "/App/utils/Message.js";
+
+/* 2) Делаем Регистраию (Только до отправки данных и рекция на них)
+    При отправке проверяем данные. Если все есть - "отправляем"
+    "Проверяем" результат и если все плохо - говорим об этом.
+    Если все хорошо - Перекидываем на авторизацию.
+    (пока без капчи)
+*/
 
 class Register {
     constructor() {
@@ -13,15 +21,9 @@ class Register {
                 <input class="auth_submit" type="submit" name="submit" value="Зарегистрироваться">
             </form>
         </section>
-
-        <section class="popUp_container disnone message">
-            <aside class="popUp">
-                <h2></h2>
-            </aside>
-        </section>
-
         `;
         this.editor = new HTMLEditor(this.html);
+        this.message = new Message();
 
         this.ComponentStart();
     }
@@ -42,23 +44,45 @@ class Register {
     setRegisterEvents() {
         this.self.querySelector(".auth").addEventListener("submit", (event) => {
             event.preventDefault();
-
-            let login = this.self.querySelector("[name=login]").value;
-            let password = this.self.querySelector("[name=password]").value;
-            let repassword = this.self.querySelector("[name=repassword]").value;
-
-            if (password !== repassword) {
-                this.showMessage("Пароли не совпадают");
-            }
+            this.registration();
         });
     }
 
-    showMessage(message) {
-        let messageCon = this.self.querySelector(".popUp h2");
-        let popUp = this.self.querySelector(".popUp_container");
+    async registration() {
+        const login = this.editor.findElementByParameter('[name="login"]').self.value;
+        const password = this.editor.findElementByParameter('[name="password"]').self.value;
+        const repassword = this.editor.findElementByParameter('[name="repassword"]').self.value;
 
-        messageCon.textContent = message;
-        popUp.classList.remove("disnone");
+        if (!login || !password || !repassword) {
+            const message = "Пропущен логин или пароли";
+            this.message.printMessage(message, 10000);
+            return false;
+        }
+        if (password !== repassword) {
+            const message = "Пароли не совпадают";
+            this.message.printMessage(message, 10000);
+            return false;
+        }
+
+        const url = "Register.php";
+        const body = {
+            login,
+            password,
+        };
+        let response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8'
+            },
+            body: JSON.stringify(body),
+        });
+
+        let result = await response.text();
+        // let result = await response.json();
+        if (!result.status) {
+            console.log(app);
+            this.message.printMessage("Похоже, пользователь с таким именем уже существует");
+        }
     }
 }
 

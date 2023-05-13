@@ -7,6 +7,7 @@ class Agents {
         this.html = `
         <section class="agents_container">
             <ul class="list_agents">
+                <a class="item_agents" href="/add" type="button" name="yes">Добавить сотрудника</a>
                 <li class="item_agents">
                     <p class="agent_name">ФИО: <span>Федоренко Павел Сергеевичь</span></p>
                     <p class="agent_born-date">Дата рождения: <span>02.03.1974</span></p>
@@ -15,6 +16,7 @@ class Agents {
                     <p class="agent_childs">Дети: <span>Нет</span></p>
                     <p class="agent_post">Должность: <span>Старший научный сотрудник</span></p>
                     <p class="agent_academic-degree">Академическая степень: <span>Доктор наук</span></p>
+                    <a href="/add" type="button" name="yes">Изменить данные</a>
                 </li>
                 <li class="item_agents">
                     <p class="agent_name">ФИО: <span>Федоренко Павел Сергеевичь</span></p>
@@ -24,6 +26,7 @@ class Agents {
                     <p class="agent_childs">Дети: <span>Нет</span></p>
                     <p class="agent_post">Должность: <span>Старший научный сотрудник</span></p>
                     <p class="agent_academic-degree">Академическая степень: <span>Доктор наук</span></p>
+                    <a href="/add" type="button" name="yes">Изменить данные</a>
                 </li>
                 <li class="item_agents">
                     <p class="agent_name">ФИО: <span>Федоренко Павел Сергеевичь</span></p>
@@ -33,6 +36,7 @@ class Agents {
                     <p class="agent_childs">Дети: <span>Нет</span></p>
                     <p class="agent_post">Должность: <span>Старший научный сотрудник</span></p>
                     <p class="agent_academic-degree">Академическая степень: <span>Доктор наук</span></p>
+                    <a href="/add" type="button" name="yes">Изменить данные</a>
                 </li>
                 <li class="item_agents">
                     <p class="agent_name">ФИО: <span>Федоренко Павел Сергеевичь</span></p>
@@ -42,6 +46,7 @@ class Agents {
                     <p class="agent_childs">Дети: <span>Нет</span></p>
                     <p class="agent_post">Должность: <span>Старший научный сотрудник</span></p>
                     <p class="agent_academic-degree">Академическая степень: <span>Доктор наук</span></p>
+                    <a href="/add" type="button" name="yes">Изменить данные</a>
                 </li>
                 <li class="item_agents">
                     <p class="agent_name">ФИО: <span>Федоренко Павел Сергеевичь</span></p>
@@ -51,6 +56,7 @@ class Agents {
                     <p class="agent_childs">Дети: <span>Нет</span></p>
                     <p class="agent_post">Должность: <span>Старший научный сотрудник</span></p>
                     <p class="agent_academic-degree">Академическая степень: <span>Доктор наук</span></p>
+                    <a href="/add" type="button" name="yes">Изменить данные</a>
                 </li>
                 <li class="item_agents">
                     <p class="agent_name">ФИО: <span>Федоренко Павел Сергеевичь</span></p>
@@ -60,6 +66,7 @@ class Agents {
                     <p class="agent_childs">Дети: <span>Нет</span></p>
                     <p class="agent_post">Должность: <span>Старший научный сотрудник</span></p>
                     <p class="agent_academic-degree">Академическая степень: <span>Доктор наук</span></p>
+                    <a href="/add" type="button" name="yes">Изменить данные</a>
                 </li>
                 <li class="item_agents">
                     <p class="agent_name">ФИО: <span>Федоренко Павел Сергеевичь</span></p>
@@ -69,6 +76,7 @@ class Agents {
                     <p class="agent_childs">Дети: <span>Нет</span></p>
                     <p class="agent_post">Должность: <span>Старший научный сотрудник</span></p>
                     <p class="agent_academic-degree">Академическая степень: <span>Доктор наук</span></p>
+                    <a href="/add" type="button" name="yes">Изменить данные</a>
                 </li>
             </ul>
         </section>

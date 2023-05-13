@@ -244,6 +244,99 @@ export default class HTMLEditor {
         }
         return this.obj;
     }
+
+    findElementByParameter(param) {
+        let result = false;
+        for (let i = 0; i < this.obj.length; i++) {
+            result = this.findElement(param, this.obj[i]);
+            if (result) break;
+        }
+        return result;
+    }
+
+    findElement(param, elem) {
+        try {
+            const mod = param[0];
+            const parameter = param.slice(1).split("]")[0];
+            switch (mod) {
+                case ".":
+                    if (elem.params !== {} && elem.params.class) {
+                        const classes = elem.params.class.split(" ");
+
+                        for (let i = 0; i < classes.length; i++) {
+                            if (classes[i] === parameter) {
+                                return elem;
+                            }
+                        }
+                    }
+
+                    if (elem.childs) {
+                        for (let i = 0; i < elem.childs.length; i++) {
+                            let res = this.findElement(param, elem.childs[i]);
+                            if (res) {
+                                return res;
+                            }
+                        }
+                    }
+
+                    break;
+                case "#":
+                    if (elem.params !== {} && elem.params.id) {
+                        const ides = elem.params.id.split(" ");
+
+                        for (let i = 0; i < ides.length; i++) {
+                            if (ides[i] === parameter) {
+                                return elem;
+                            }
+                        }
+                    }
+
+                    if (elem.childs) {
+                        for (let i = 0; i < elem.childs.length; i++) {
+                            let res = this.findElement(param, elem.childs[i]);
+                            if (res) {
+                                return res;
+                            }
+                        }
+                    }
+
+                    break;
+                case "[":
+
+                    if (elem.params !== {}) {
+                        const key = parameter.split("=")[0];
+                        const val = parameter.split("=")[1].replace(/['"]/g, '');
+                        if (elem.params[key] === val) {
+                            return elem;
+                        }
+                    }
+
+                    if (elem.childs) {
+                        for (let i = 0; i < elem.childs.length; i++) {
+                            let res = this.findElement(param, elem.childs[i]);
+                            if (res) {
+                                return res;
+                            }
+                        }
+                    }
+
+                    break;
+                default:
+
+                    if (elem.self.tagName.toLowerCase() == param.toLowerCase()) {
+                        return elem;
+                    }
+
+                    if (elem.childs) {
+                        for (let i = 0; i < elem.childs.length; i++) {
+                            return this.findElement(param, elem.childs[i]);
+                        }
+                    }
+            }
+        } catch (e) {
+            console.log(e); return false;
+        }
+    }
 }
 
 // const str = `
