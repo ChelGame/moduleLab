@@ -1,13 +1,6 @@
 import HTMLEditor from "/App/utils/HTMLEditor.js";
 import Message from "/App/utils/Message.js";
 
-/* 2) Делаем Регистраию (Только до отправки данных и рекция на них)
-    При отправке проверяем данные. Если все есть - "отправляем"
-    "Проверяем" результат и если все плохо - говорим об этом.
-    Если все хорошо - Перекидываем на авторизацию.
-    (пока без капчи)
-*/
-
 class Register {
     constructor() {
         this.self = document.createElement("div");
@@ -19,6 +12,7 @@ class Register {
                 <input class="auth_password" type="password" name="password" value="" placeholder="Пароль">
                 <input class="auth_password" type="password" name="repassword" value="" placeholder="Повторить пароль">
                 <input class="auth_submit" type="submit" name="submit" value="Зарегистрироваться">
+                <div id="recaptcha"></div>
             </form>
         </section>
         `;
@@ -38,7 +32,17 @@ class Register {
     }
 
     getContent() {
+        this.renderCaptcha();
         return this.self;
+    }
+
+    async renderCaptcha() {
+        // Лютый костыль, но ничего умней я не придумал
+        setTimeout(function () {
+            grecaptcha.render("recaptcha", {
+              'sitekey' : '6LfEDBEmAAAAAOYcCe0fmKhwnA6E7vpoSjdEkrnV'
+            });
+        }, 500);
     }
 
     setRegisterEvents() {
@@ -49,25 +53,36 @@ class Register {
     }
 
     async registration() {
+
         const login = this.editor.findElementByParameter('[name="login"]').self.value;
         const password = this.editor.findElementByParameter('[name="password"]').self.value;
         const repassword = this.editor.findElementByParameter('[name="repassword"]').self.value;
+        const captcha = (grecaptcha.getResponse()) ? true : false;
 
         if (!login || !password || !repassword) {
             const message = "Пропущен логин или пароли";
             this.message.printMessage(message, 10000);
             return false;
         }
+
         if (password !== repassword) {
             const message = "Пароли не совпадают";
             this.message.printMessage(message, 10000);
             return false;
         }
 
-        const url = "Register.php";
+        if (!captcha) {
+            const message = "Вы не прошли капчу";
+            this.message.printMessage(message, 10000);
+            return false;
+        }
+
+        const url = "/App/php/register.php";
         const body = {
+            task: 'register',
             login,
             password,
+            captcha,
         };
         let response = await fetch(url, {
             method: 'POST',
@@ -77,12 +92,14 @@ class Register {
             body: JSON.stringify(body),
         });
 
-        let result = await response.text();
-        // let result = await response.json();
+        // let result = await response.text();
+        let result = await response.json();
         if (!result.status) {
-            console.log(app);
-            this.message.printMessage("Похоже, пользователь с таким именем уже существует");
+            this.message.printMessage(result.message || "Что-то пошло не так");
+            return;
         }
+        this.message.printMessage("Вы успешно зарегистрировались. Теперь вы можете авторизоваться", 10000);
+        app.setState({url: '/auth'});
     }
 }
 

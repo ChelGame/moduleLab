@@ -13,6 +13,8 @@ class App {
 
         this.AppStart();
     }
+    // Не забыть добавить блок кнопкам, пока не обработано обращение
+
     // По поводу входа, надо придумать, в какой момент делать проверку входа.
     /*
     Итак
@@ -60,6 +62,7 @@ class App {
     downloadPage() {
         switch (this.state.url) {
             case "/auth":
+                if (this.getAuth()) return;
                 let auth = new Auth();
                 this.render(auth.getContent());
                 break;
@@ -68,10 +71,14 @@ class App {
                 this.render(articles.getContent());
                 break;
             case "/agents":
+                if (!this.getAuth()) return;
+                if (this.state.auth.role === "Сотрудник") return;
+
                 let agents = new Agents();
                 this.render(agents.getContent());
                 break;
             case "/register":
+                if (this.getAuth()) return;
                 let register = new Register();
                 this.render(register.getContent());
                 break;
@@ -83,15 +90,26 @@ class App {
 
     // Работа со входом
     async checkAuth() {
-        if (!this.state.auth) {
-            let result = this.getAuthFromServer();
 
+        if (this.state.auth) {
+            let result = await this.getAuthFromServer();
             this.setAuthToState(result);
         }
     }
 
+    getAuth() {
+        let result;
+        if (this.state.auth) {
+            result = this.getAuthFromServer();
+        }
+        return (result) ? true: false;
+    }
+
     async getAuthFromServer() {
-        const data = {task: "checkAuth",};
+        const data = {
+            task: "checkAuth",
+            auth: this.state.auth,
+        };
         const url = './App/php/auth.php';
 
         let response = await fetch(url, {
@@ -106,23 +124,65 @@ class App {
     }
 
     setAuthToState(result) {
-        if (result['result'] === true) {
-            this.state.auth = result['auth'];
-            this.leadToRoleMatching();
+        let state;
+        if (result.auth) {
+            state = {...this.state, ...result};
         } else {
-            this.state.auth = false;
+            state = {...this.state, auth: false};
         }
-        this.setState(this.state);
+        this.setState(state);
     }
 
     leadToRoleMatching() {
-        switch (auth['role']) {
-            case 'guest':
+        // Скрытие ссылок
+        document.querySelectorAll("[data-historyLink]").forEach((historyLink) => {
+            switch (historyLink.attributes[1].nodeValue) {
+                case '/exit':
+                    // Скрываем ссылку
+                    if (this.getAuth()) {
+                        historyLink.parentNode.hidden = false;
+                    } else {
+                        historyLink.parentNode.hidden = true;
+                    }
+                    // Вешаем обработку выхода
+                    historyLink.addEventListener("click", (event) => {
+                        this.exit();
+                    });
 
-                break;
-            default:
+                    break;
+                case '/auth':
+                    if (this.getAuth()) {
+                        historyLink.parentNode.hidden = true;
+                    } else {
+                        historyLink.parentNode.hidden = false;
+                    }
+                    break;
+                case '/register':
+                    if (this.getAuth()) {
+                        historyLink.parentNode.hidden = true;
+                    } else {
+                        historyLink.parentNode.hidden = false;
+                    }
+                    break;
+                case '/main':
 
-        }
+                    break;
+                case '/agents':
+                    if (this.getAuth() &&
+                        this.state.auth.role !== "Сотрудник" &&
+                        this.state.auth.role !== "Гость") {
+                        historyLink.parentNode.hidden = false;
+                    } else {
+                        historyLink.parentNode.hidden = true;
+                    }
+                    break;
+                case '/articles':
+
+                    break;
+                default:
+                    return;
+            };
+        });
     }
 
     // Работа с состояниями
@@ -130,18 +190,20 @@ class App {
         if (this.state != this.pastState) {
             this.pastState = this.state;
         }
-        this.state = state;
+        this.state = {...this.state, ...state};
 
         this.handlerState();
+        this.leadToRoleMatching();
     }
 
     setStateWithoutHistoryChange(state) {
         if (this.state != this.pastState) {
             this.pastState = this.state;
         }
-        this.state = state;
+        this.state = {...this.state, ...state};
 
         this.handlerStateWithoutHistoryChange();
+        this.leadToRoleMatching();
     }
 
     setStateToStorage() {
@@ -156,6 +218,25 @@ class App {
         window.history.replaceState({"AppState": this.state}, document.title, this.state.url);
     }
 
+    async exit() {
+        const data = {
+            task: "exit",
+        };
+        const url = './App/php/auth.php';
+
+        let response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8'
+            },
+            body: JSON.stringify(data)
+        });
+
+        let result = await response.json();
+        if (result.status) {
+            this.checkAuth();
+        }
+    }
 
     listenToHistory(event) {
 
@@ -164,6 +245,8 @@ class App {
 
     // "реагирует" на изменение состояния и делает что-то на основе этого изменения
     handlerState() {
+        // Чтобы лишний раз не рендерить.
+        // Если что-то не отрисовалось - первым делом смотреть сюда.
         if (this.state == this.pastState) return;
 
         this.setStateToHistory();
@@ -184,13 +267,17 @@ class App {
     setAppEvents() {
         // Это происходит при клике на объект со свойством data-historyLink (аля ссылку в шапке или подвале)
         document.querySelectorAll("[data-historyLink]").forEach((historyLink) => {
+            // Подгрузка страниц
             historyLink.addEventListener("click", (event) => {
                 event.preventDefault();
-                const state = {
-                    url: event.target.attributes[1].nodeValue,
+                if (event.target.attributes[1].nodeValue !== "/exit") {
+                    const state = {
+                        url: event.target.attributes[1].nodeValue,
+                    }
+                    this.setState(state);
                 }
-                this.setState(state);
             });
+
         });
 
         window.addEventListener("popstate", (event) => {
@@ -205,10 +292,5 @@ class App {
     }
 }
 
-/*
-План на день:
-    1) Продумать авторизацию
-
-*/
 
 const app = new App();

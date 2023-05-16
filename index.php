@@ -8,6 +8,7 @@
         <link rel="stylesheet" href="./css/index.css">
         <link rel="stylesheet" href="./css/media.css">
         <script type="module" defer src="./App/App.js"></script>
+        <script src="https://www.google.com/recaptcha/api.js"></script>
     </head>
     <body>
         <header>
@@ -20,11 +21,11 @@
             <section class="navigation_container">
                 <nav>
                     <ul>
-                        <li hidden><a href="#">Выйти</a></li>
+                        <li><a data-historyLink href="/exit">Выйти</a></li>
                         <li><a data-historyLink href="/auth">Войти</a></li>
                         <li><a data-historyLink href="/register">Регистрация</a></li>
                         <li><a data-historyLink href="/main">Главная</a></li>
-                        <li ><a data-historyLink href="/agents">Наши сотрудники</a></li>
+                        <li><a data-historyLink href="/agents">Наши сотрудники</a></li>
                         <li><a data-historyLink href="/articles">Публикации</a></li>
                     </ul>
                 </nav>
@@ -42,12 +43,12 @@
             <section class="navigation_container">
                 <nav>
                     <ul>
-                        <li hidden><a href="#">Выйти</a></li>
+                        <li><a data-historyLink href="/exit">Выйти</a></li>
                         <li><a data-historyLink href="/auth">Войти</a></li>
                         <li><a data-historyLink href="/register">Регистрация</a></li>
-                        <li><a data-historyLink href="/main" >Главная</a></li>
-                        <li hidden><a data-historyLink href="/agents" >Наши сотрудники</a></li>
-                        <li><a data-historyLink href="/articles" >Публикации</a></li>
+                        <li><a data-historyLink href="/main">Главная</a></li>
+                        <li><a data-historyLink href="/agents">Наши сотрудники</a></li>
+                        <li><a data-historyLink href="/articles">Публикации</a></li>
                     </ul>
                 </nav>
             </section>

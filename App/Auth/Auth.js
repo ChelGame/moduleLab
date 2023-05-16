@@ -2,21 +2,7 @@ import HTMLEditor from "/App/utils/HTMLEditor.js";
 import Message from "/App/utils/Message.js";
 
 // Сегодня
-/* 1) Делаем вход (без реальной аутентификации и авторизации)
-    При отправке проверяем данные. Если все есть - "отправляем"
-    "Проверяем" результат и если все плохо - говорим об этом.
-    Если все хорошо - Перекидываем на главную и меняем состояние на вход и роль
-    От роли даем доступ. (Проверить, что нет способа получить доступ к запрещенным функциям)
-*/
-/* 2) Делаем Регистраию (Только до отправки данных и рекция на них)
-    При отправке проверяем данные. Если все есть - "отправляем"
-    "Проверяем" результат и если все плохо - говорим об этом.
-    Если все хорошо - Перекидываем на авторизацию.
-    (пока без капчи)
-*/
-/* 3) Делаем Базу данных
-    Заполняем ее тестовыми данными о сотрудниках, админе, паре сотрудников профкома и кадровиков.
-    Добавляем категории и таблицы по необходимости (скорее всего нужны будут направления (физики, математики и т.д.))
+/* 1) Делаем вход
 */
 
 class Auth {
@@ -87,10 +73,11 @@ class Auth {
             return false;
         }
 
-        const url = "Auth.php";
+        const url = "/App/php/auth.php";
         const body = {
             login,
             password,
+            task: "auth",
         };
         let response = await fetch(url, {
             method: 'POST',
@@ -100,9 +87,8 @@ class Auth {
             body: JSON.stringify(body),
         });
 
-        let result = await response.text();
-        // let result = await response.json();
-        if (result.status) {
+        let result = await response.json();
+        if (result.auth) {
             this.authorization(result);
         } else {
             this.message.printMessage("Проверьте правильность введенных данных");
@@ -110,7 +96,7 @@ class Auth {
     }
 
     authorization(data) {
-
+        app.setAuthToState({url: "/main", ...data});
     }
 
     getContent() {
