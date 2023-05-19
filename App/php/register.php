@@ -8,8 +8,9 @@ $data = json_decode($data, true);
 
 $_MyData = [
     "publick" => '6LfEDBEmAAAAAOYcCe0fmKhwnA6E7vpoSjdEkrnV',
-    "private" => '6LfEDBEmAAAAAAAi1gvoC8ynT8PNHytXkEf9voYW',
+    "private" => '',
 ];
+echo json_encode($_POST);
 
 switch ($data["task"]) {
     case 'register':

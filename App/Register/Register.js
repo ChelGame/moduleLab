@@ -37,12 +37,14 @@ class Register {
     }
 
     async renderCaptcha() {
-        // Лютый костыль, но ничего умней я не придумал
-        setTimeout(function () {
-            grecaptcha.render("recaptcha", {
-              'sitekey' : '6LfEDBEmAAAAAOYcCe0fmKhwnA6E7vpoSjdEkrnV'
-            });
-        }, 500);
+        let t = setInterval(() => {
+            if (grecaptcha.render) {
+                grecaptcha.render("recaptcha", {
+                  'sitekey' : '6LfEDBEmAAAAAOYcCe0fmKhwnA6E7vpoSjdEkrnV'
+                });
+                clearInterval(t);
+            }
+        }, 10);
     }
 
     setRegisterEvents() {

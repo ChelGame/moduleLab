@@ -11,7 +11,7 @@ class Auth {
         this.self.classList.add("Auth_component");
         this.html = `
         <section class="auth_container">
-            <form class="auth" >
+            <form class="auth" method="post" action="/App/php/register.php">
                 <input class="auth_login" type="text" name="login" value="" placeholder="Логин">
                 <input class="auth_password" type="password" name="password" value="" placeholder="Пароль">
                 <input class="auth_submit" type="submit" name="submit" value="Войти">
@@ -96,7 +96,7 @@ class Auth {
     }
 
     authorization(data) {
-        app.setAuthToState({url: "/main", ...data});
+        app.setAuthToState({url: "/app/main", ...data});
     }
 
     getContent() {

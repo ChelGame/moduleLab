@@ -32,6 +32,10 @@ class App {
 
     */
 
+
+    Сегодня рефакторим код.
+    Нам нужно сделать методы обращений к бд статичными. Перевести приложение в сокрытый режим.
+
     AppStart() {
 
         this.setStateWithoutHistoryChange(this.getState());
@@ -60,7 +64,15 @@ class App {
 
     // Подгружает контент страницы
     downloadPage() {
-        switch (this.state.url) {
+        let url = '/' + this.state.url.split('/')[1].split('?')[0];
+        switch (url) {
+            case "/add":
+                if (!this.getAuth()) return;
+                if (this.state.auth.role === "Сотрудник") return;
+
+                let add = new Agents();
+                this.render(add.getContent());
+                break;
             case "/auth":
                 if (this.getAuth()) return;
                 let auth = new Auth();

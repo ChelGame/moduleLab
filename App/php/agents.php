@@ -6,46 +6,32 @@ $data = file_get_contents('php://input');
 
 $data = json_decode($data, true);
 
-$_MyData = [
-    "publick" => '6LfEDBEmAAAAAOYcCe0fmKhwnA6E7vpoSjdEkrnV',
-    "private" => '6LfEDBEmAAAAAAAi1gvoC8ynT8PNHytXkEf9voYW',
-];
+$_MyData = [];
+
+    /*
+
+    Тут все просто. При запросах учитывать роли, и возможно пустые поля
+
+    */
 
 switch ($data["task"]) {
-    case 'register':
+    case 'getAgents':
         try {
-            if (!$data['captcha']) {
-                echo json_encode(['status' => false]);
-                die();
-            }
-
             $dbh = new PDO($connectData, $DBuser, $DBpassword);
-            $login = $data['login'];
-            $password = password_hash($data['password'], PASSWORD_BCRYPT);
 
-            // Проверка на добавление нового пользователя
-            $stmt = $dbh->prepare("SELECT count(*) as count from users");
+            $stmt = $dbh->prepare("SELECT `first_name`, `last_name`, `surename`, `born_date`, `gender`, `family_status`, `childs`, `academic_degree`, `user_id`, `name` as post FROM `employees`, `posts` where post = posts.id");
             $stmt->execute([]);
-            $c1 = $stmt->fetchAll(PDO::FETCH_ASSOC)[0]['count'];
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            $stmt = $dbh->prepare("INSERT INTO `users`(`login`, `password`, `role_id`) VALUES (?, ?, ?)");
-            $stmt->execute([$login, $password, 3]);
-
-            // Проверка на добавление нового пользователя
-            // Не берем в расчет возможность добавления пользователя другим человеком в это время.
-            $stmt = $dbh->prepare("SELECT count(*) as count from users");
-            $stmt->execute([]);
-            $c2 = $stmt->fetchAll(PDO::FETCH_ASSOC)[0]['count'];
-
-            if ($c1 < $c2) {
-                echo json_encode(['status' => true, 'message' => "Вы успешно зарегистрировались."]);
-                die();
+            if ($result) {
+                echo json_encode(['status' => true, "agents" => $result]);
+            } else {
+                echo json_encode(['status' => false, "agents" => $result]);
             }
-
-            echo json_encode(['status' => false, 'message' => "Пользователь с таким именем уже существует уже существует"]);
             $dbh = null;
         } catch (PDOException $e) {
-            echo json_encode(['status' => false, 'message' => "Произошла ошибка. Попробуйте позже."]);
+            echo json_encode(['status' => false]);
+            die();
         }
         break;
     default:

@@ -358,6 +358,8 @@ footer a, footer p {
 }
 
 .item_agents {
+    width: 100%;
+
     padding: 20px;
     margin-bottom: 20px;
     border-radius: 10px;
@@ -371,7 +373,7 @@ footer a, footer p {
     margin-bottom: 0;
 }
 
-.item_agents p {
+.item_agents label, .item_agents p {
     padding: 10px;
     border-bottom: 1px solid #000;
 }
