@@ -30,14 +30,7 @@ switch ($data["task"]) {
         }
         break;
     case 'checkAuth':
-        $id = $data["auth"]['id'];
-        $role = $data["auth"]['role'];
-
-        $sid = $_SESSION["auth"]["id"];
-        $srole = $_SESSION["auth"]["role"];
-
-        // Если данные в сессии не совпадают с данными от клиента, сбросить вход
-        if ($_SESSION["auth"] && $id == $sid && $role == $srole) {
+        if ($_SESSION["auth"]) {
             echo json_encode(['auth' => $_SESSION["auth"]]);
         } else {
             $_SESSION["auth"] = null;

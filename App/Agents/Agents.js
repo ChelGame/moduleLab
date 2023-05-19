@@ -22,7 +22,8 @@ import HTMLEditor from "/App/utils/HTMLEditor.js";
 */
 
 class Agents {
-    constructor() {
+    constructor(App) {
+        this.app = App;
         this.self = document.createElement("div");
         this.self.classList.add("Agents_component");
         this.html = `
@@ -52,17 +53,75 @@ class Agents {
         this.ComponentStart();
     }
 
+    // general state funcs
+    async checkAuth() {
+
+        if (this.state.auth) {
+            let result = await this.getAuthFromServer();
+            this.setAuthToState(result);
+        }
+    }
+    async getAuthFromServer() {
+        const data = {
+            task: "checkAuth",
+            auth: this.state.auth,
+        };
+        const url = './App/php/auth.php';
+
+        let response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8'
+            },
+            body: JSON.stringify(data)
+        });
+
+        return await response.json();
+    }
+    // Обобщающий метод, возвращающий состояние из наиболее доверенного источника.
+    getState() {
+        let initialState = {
+            url: "/main",
+            auth: false,
+        };
+        return this.getStateFromStorage() || this.getStateFromHistory() || initialState;
+    }
+    getStateFromStorage() {
+        if (!localStorage.length) return null;
+        return JSON.parse(localStorage.getItem("AppState"));
+    }
+    getStateFromHistory() {
+        if (!window.history || !window.history.state) return null;
+        return window.history.state["AppState"];
+    }
+
+    setAuthToState(result) {
+        let state;
+        if (result.auth) {
+            state = {...this.state, ...result};
+        } else {
+            state = {...this.state, auth: false};
+        }
+        this.setState(state);
+    }
+    setState(state) {
+        this.state = {...this.state, ...state};
+    }
+
     ComponentStart() {
-        // В HTMLEditor лучше не лезть без особой необходимости. Писал я его давно.
-        // Причем так, чтобы не пришлось лезть.
-        // В начале файла есть комент с алгоритмом использование
+        this.setState(this.getState());
+        this.checkAuth();
+
         this.selfEditor.HTMLParser();
         this.cardEditor.HTMLParser();
         this.checkURL();
+        // В HTMLEditor лучше не лезть без особой необходимости. Писал я его давно.
+        // Причем так, чтобы не пришлось лезть.
+        // В начале файла есть комент с алгоритмом использование
     }
 
     checkURL() {
-        let url = '/' + app.state.url.split('/')[1].split('?')[0];
+        let url = '/' + this.state.url.split('/')[1].split('?')[0];
         switch (url) {
             case "/add":
 
@@ -101,10 +160,14 @@ class Agents {
     }
 
     setAgentsEvents() {
-        this.selfEditor.findElementByParameter('[name=add]').self.addEventListener("click", () => {
-            event.preventDefault();
-            app.setState({url: event.target.attributes[1].nodeValue});
-        });
+        if (this.state.auth.role !== "Профком") {
+            this.selfEditor.findElementByParameter('[name=add]').self.addEventListener("click", () => {
+                event.preventDefault();
+                this.app.setState({url: event.target.attributes[1].nodeValue});
+            });
+        } else {
+            this.selfEditor.findElementByParameter('[name=add]').self.hidden = true;
+        }
 
         this.getAgents();
     }
@@ -136,8 +199,8 @@ class Agents {
             this.cardEditor.findElementByParameter('.agent_academic-degree').self.textContent = `
                 ${item.academic_degree}
             `;
-            console.log(app.getAuth());
-            if (app.getAuth() && (app.state.auth != "Гость" && app.state.auth != "Сотрудник")) {
+
+            if (this.state.auth.role === "Профком") {
                 this.cardEditor.findElementByParameter('[name="change"]').self.href +=`?id=${item.user_id}`;
             }
 

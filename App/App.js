@@ -6,7 +6,6 @@ import Auth     from "./Auth/Auth.js";
 
 class App {
     constructor() {
-        window.app = this // для отладки
         this.state = {}
         this.pastState = {}
         this.self = document.querySelector("main");
@@ -14,30 +13,10 @@ class App {
         this.AppStart();
     }
     // Не забыть добавить блок кнопкам, пока не обработано обращение
-
-    // По поводу входа, надо придумать, в какой момент делать проверку входа.
-    /*
-    Итак
-    Проверку на вход делать в AppStart \|
-    Отправлять запрос на сервер только если в состоянии указан вход.\|
-    Если в состоянии указан вход, но на сервере он не указан - убирать вход в состоянии\|
-    От входа убирать или добавлять ссылку на сотрудников (специфика задачи)
-    За остальные активности со входом отвечает компонент Auth
-    Когда происходит вход, необходимо поменять AppState в локальном хранилище.
-    Также поменять вход на выход
-    При выходе сделать запрос на выход и привести приложение в соответсвующий вид.
-    Также переместить с запрещенной страницы, если надо.
-    По поводу входа в Auth. Возможно, получится реализовать переход путем изменения истории (попробовать)
-    Если не прокатит - попробовать создать синтетическое событие и прокинуть его
-
-    */
-
-
-    Сегодня рефакторим код.
-    Нам нужно сделать методы обращений к бд статичными. Перевести приложение в сокрытый режим.
+    // Сегодня рефакторим код.
+    // Нам нужно сделать методы обращений к бд статичными. Перевести приложение в сокрытый режим.
 
     AppStart() {
-
         this.setStateWithoutHistoryChange(this.getState());
         this.checkAuth();
         this.setAppEvents();
@@ -56,7 +35,6 @@ class App {
         if (!localStorage.length) return null;
         return JSON.parse(localStorage.getItem("AppState"));
     }
-
     getStateFromHistory() {
         if (!window.history || !window.history.state) return null;
         return window.history.state["AppState"];
@@ -64,63 +42,63 @@ class App {
 
     // Подгружает контент страницы
     downloadPage() {
-        let url = '/' + this.state.url.split('/')[1].split('?')[0];
-        switch (url) {
-            case "/add":
-                if (!this.getAuth()) return;
-                if (this.state.auth.role === "Сотрудник") return;
+        try {
+            let url = '/' + this.state.url.split('/')[1].split('?')[0];
+            switch (url) {
+                case "/add":
+                    if (!this.state.auth) break;
+                    if (this.state.auth.role === "Сотрудник") break;
+                    if (this.state.auth.role === "Гость") break;
+                    if (this.state.auth.role === "Профком") break;
 
-                let add = new Agents();
-                this.render(add.getContent());
-                break;
-            case "/auth":
-                if (this.getAuth()) return;
-                let auth = new Auth();
-                this.render(auth.getContent());
-                break;
-            case "/articles":
-                let articles = new Articles();
-                this.render(articles.getContent());
-                break;
-            case "/agents":
-                if (!this.getAuth()) return;
-                if (this.state.auth.role === "Сотрудник") return;
+                    let add = new Agents(this);
+                    this.render(add.getContent());
+                    return;
+                case "/auth":
+                    if (this.state.auth) break;
 
-                let agents = new Agents();
-                this.render(agents.getContent());
-                break;
-            case "/register":
-                if (this.getAuth()) return;
-                let register = new Register();
-                this.render(register.getContent());
-                break;
-            default:
-                let main = new Main();
-                this.render(main.getContent());
+                    let auth = new Auth(this);
+                    this.render(auth.getContent());
+                    return;
+                case "/articles":
+                    let articles = new Articles();
+                    this.render(articles.getContent());
+                    return;
+                case "/agents":
+                    if (!this.state.auth) break;
+                    if (this.state.auth.role === "Сотрудник") break;
+                    if (this.state.auth.role === "Гость") break;
+
+                    let agents = new Agents(this);
+                    this.render(agents.getContent());
+                    return;
+                case "/register":
+                    if (this.state.auth) break;
+
+                    let register = new Register(this);
+                    this.render(register.getContent());
+                    return;
+                default:
+                    let main = new Main();
+                    this.render(main.getContent());
+            }
+            this.setState({url: "/main"});
+        } catch (e) {
+            this.setState({url: "/main"});
         }
     }
 
     // Работа со входом
     async checkAuth() {
 
-        if (this.state.auth) {
+        // if (this.state.auth) {
             let result = await this.getAuthFromServer();
             this.setAuthToState(result);
-        }
+        // }
     }
-
-    getAuth() {
-        let result;
-        if (this.state.auth) {
-            result = this.getAuthFromServer();
-        }
-        return (result) ? true: false;
-    }
-
     async getAuthFromServer() {
         const data = {
             task: "checkAuth",
-            auth: this.state.auth,
         };
         const url = './App/php/auth.php';
 
@@ -134,6 +112,15 @@ class App {
 
         return await response.json();
     }
+
+    // getAuth() {
+    //     let result;
+    //     if (this.state.auth) {
+    //         result = this.getAuthFromServer();
+    //     }
+    //     return (result) ? true: false;
+    // }
+
 
     setAuthToState(result) {
         let state;
@@ -151,7 +138,7 @@ class App {
             switch (historyLink.attributes[1].nodeValue) {
                 case '/exit':
                     // Скрываем ссылку
-                    if (this.getAuth()) {
+                    if (this.state.auth) {
                         historyLink.parentNode.hidden = false;
                     } else {
                         historyLink.parentNode.hidden = true;
@@ -163,33 +150,27 @@ class App {
 
                     break;
                 case '/auth':
-                    if (this.getAuth()) {
+                    if (this.state.auth) {
                         historyLink.parentNode.hidden = true;
                     } else {
                         historyLink.parentNode.hidden = false;
                     }
                     break;
                 case '/register':
-                    if (this.getAuth()) {
+                    if (this.state.auth) {
                         historyLink.parentNode.hidden = true;
                     } else {
                         historyLink.parentNode.hidden = false;
                     }
                     break;
-                case '/main':
-
-                    break;
                 case '/agents':
-                    if (this.getAuth() &&
+                    if (this.state.auth &&
                         this.state.auth.role !== "Сотрудник" &&
                         this.state.auth.role !== "Гость") {
                         historyLink.parentNode.hidden = false;
                     } else {
                         historyLink.parentNode.hidden = true;
                     }
-                    break;
-                case '/articles':
-
                     break;
                 default:
                     return;
@@ -207,7 +188,6 @@ class App {
         this.handlerState();
         this.leadToRoleMatching();
     }
-
     setStateWithoutHistoryChange(state) {
         if (this.state != this.pastState) {
             this.pastState = this.state;
@@ -218,16 +198,37 @@ class App {
         this.leadToRoleMatching();
     }
 
+    setStateToHistory() {
+
+        window.history.pushState({"AppState": this.state}, document.title, this.state.url);
+    }
+    setStateToHistoryWithoutHistoryChange() {
+
+        window.history.replaceState({"AppState": this.state}, document.title, this.state.url);
+    }
+
     setStateToStorage() {
         localStorage.setItem("AppState", JSON.stringify(this.state));
     }
 
-    setStateToHistory() {
-        window.history.pushState({"AppState": this.state}, document.title, this.state.url);
-    }
+    // "реагирует" на изменение состояния и делает что-то на основе этого изменения
+    handlerState() {
+        // Чтобы лишний раз не рендерить.
+        // Если что-то не отрисовалось - первым делом смотреть сюда.
+        if (this.state == this.pastState) return;
 
-    setStateToHistoryWithoutHistoryChange() {
-        window.history.replaceState({"AppState": this.state}, document.title, this.state.url);
+        this.setStateToHistory();
+        this.setStateToStorage();
+
+        if (this.state.url !== this.pastState.url) this.downloadPage();
+    }
+    handlerStateWithoutHistoryChange() {
+        if (this.state == this.pastState) return;
+
+        this.setStateToStorage();
+        this.setStateToHistoryWithoutHistoryChange();
+
+        if (this.state.url !== this.pastState.url) this.downloadPage();
     }
 
     async exit() {
@@ -249,30 +250,10 @@ class App {
             this.checkAuth();
         }
     }
-
     listenToHistory(event) {
+        console.log(event);
 
         this.setStateWithoutHistoryChange(event.target.history.state["AppState"]);
-    }
-
-    // "реагирует" на изменение состояния и делает что-то на основе этого изменения
-    handlerState() {
-        // Чтобы лишний раз не рендерить.
-        // Если что-то не отрисовалось - первым делом смотреть сюда.
-        if (this.state == this.pastState) return;
-
-        this.setStateToHistory();
-        this.setStateToStorage();
-
-        if (this.state.url !== this.pastState.url) this.downloadPage();
-    }
-    handlerStateWithoutHistoryChange() {
-        if (this.state == this.pastState) return;
-
-        this.setStateToStorage();
-        this.setStateToHistoryWithoutHistoryChange();
-
-        if (this.state.url !== this.pastState.url) this.downloadPage();
     }
 
     // Устанавливает события приложения

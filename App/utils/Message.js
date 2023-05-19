@@ -21,22 +21,26 @@ export default class Message {
     }
 
     printMessage(message, timeout = 5000) {
-        document.body.append(this.self);
+        try {
+            document.body.append(this.self);
 
-        this.self.classList.remove("disnone");
-        this.message.innerHTML = message;
+            this.self.classList.remove("disnone");
+            this.message.innerHTML = message;
 
-        if (timeout) {
-            this.timeout = setTimeout(() => {
-                this.removeMessage();
-            }, timeout);
-        }
+            if (timeout) {
+                this.timeout = setTimeout(() => {
+                    this.removeMessage();
+                }, timeout);
+            }
+        } catch (e) {}
     }
 
     removeMessage() {
-        this.self.classList.add("disnone");
-        setTimeout(() => {
-            document.body.removeChild(this.self);
-        }, 200);
+        try {
+            this.self.classList.add("disnone");
+            setTimeout(() => {
+                document.body.removeChild(this.self);
+            }, 200);
+        } catch (e) {} 
     }
 }

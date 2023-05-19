@@ -2,7 +2,8 @@ import HTMLEditor from "/App/utils/HTMLEditor.js";
 import Message from "/App/utils/Message.js";
 
 class Register {
-    constructor() {
+    constructor(App) {
+        this.app = App;
         this.self = document.createElement("div");
         this.self.classList.add("Register_component");
         this.html = `
@@ -101,7 +102,7 @@ class Register {
             return;
         }
         this.message.printMessage("Вы успешно зарегистрировались. Теперь вы можете авторизоваться", 10000);
-        app.setState({url: '/auth'});
+        this.app.setState({url: '/auth'});
     }
 }
 
