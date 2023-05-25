@@ -58,6 +58,7 @@ header {
     background-color: #e1e1e155;
 
     box-shadow: 0px 1px 20px 0px;
+    z-index: 1;
 }
 
 .page_name {
@@ -208,7 +209,7 @@ footer a, footer p {
     justify-content: center;
     align-items: center;
     background-color: #00000055;
-    position: absolute;
+    position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
@@ -384,4 +385,106 @@ footer a, footer p {
     margin-top: 10px;
     padding: 10px;
     border: 1px solid #000;
+}
+/* Add */
+
+.add_container {
+    display: flex;
+    flex-direction: column;
+
+    margin: 50px auto;
+}
+.add_container label {
+    width: 100%;
+    position: relative;
+
+    padding: 20px;
+    border-bottom: 1px solid #000;
+
+    font-size: 18px;
+
+}
+.add_container input, .add_container select {
+    width: 100%;
+
+    margin-top: 10px;
+    padding: 10px;
+    border: 1px solid #000;
+    border-radius: 5px;
+
+}
+.add_container button {
+    width: 100%;
+
+    padding: 20px;
+    margin-top: 10px;
+
+    font-size: 18px;
+
+    box-shadow: 0 0 5px 0;
+}
+
+.help {
+    position: absolute;
+    opacity: 0;
+
+    max-width: 300px;
+    bottom: -20px;
+    left: 120px;
+
+    padding: 10px;
+    border-radius: 10px;
+
+    font-size: 14px;
+    color: #fff;
+
+    background-color: #000000cf;
+
+    transition: .3s;
+    z-index: -1;
+}
+.add_container label:hover .help {
+    opacity: 1;
+    z-index: 0;
+}
+
+/* Remove Agent */
+
+.removeCon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #00000055;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    height: 100%;
+    width: 100%;
+    z-index: 1;
+    transition: .2s;
+}
+.remove {
+    padding: 50px;
+    border-radius: 10px;
+
+    background-color: #fff;
+}
+.removeButtonCon {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 10px;
+    margin-top: 10px;
+}
+.removeButtonCon button {
+    padding: 10px 20px;
+
+    background-color: inherit;
+
+    font-size: 16px;
+    color: #000;
+
+    box-shadow: 0 0 5px 0;
 }

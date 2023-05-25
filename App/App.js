@@ -81,20 +81,19 @@ class App {
                 default:
                     let main = new Main();
                     this.render(main.getContent());
+                    return;
             }
             this.setState({url: "/main"});
         } catch (e) {
+            console.log(e);
             this.setState({url: "/main"});
         }
     }
 
     // Работа со входом
     async checkAuth() {
-
-        // if (this.state.auth) {
-            let result = await this.getAuthFromServer();
-            this.setAuthToState(result);
-        // }
+        let result = await this.getAuthFromServer();
+        this.setAuthToState(result);
     }
     async getAuthFromServer() {
         const data = {
@@ -247,11 +246,11 @@ class App {
 
         let result = await response.json();
         if (result.status) {
+            this.setState({url: "/main"});
             this.checkAuth();
         }
     }
     listenToHistory(event) {
-        console.log(event);
 
         this.setStateWithoutHistoryChange(event.target.history.state["AppState"]);
     }

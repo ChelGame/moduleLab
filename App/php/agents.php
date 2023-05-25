@@ -19,7 +19,7 @@ switch ($data["task"]) {
         try {
             $dbh = new PDO($connectData, $DBuser, $DBpassword);
 
-            $stmt = $dbh->prepare("SELECT `first_name`, `last_name`, `surename`, `born_date`, `gender`, `family_status`, `childs`, `academic_degree`, `user_id`, `name` as post FROM `employees`, `posts` where post = posts.id");
+            $stmt = $dbh->prepare("SELECT `first_name`, `last_name`, `surename`, `born_date`, `gender`, `family_status`, `childs`, `academic_degree`, `user_id`, `posts`.`name` as post, `disciplines`.`name` as discipline FROM `employees`, `posts`, `disciplines` where post = posts.id AND discipline_id = disciplines.id");
             $stmt->execute([]);
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -28,6 +28,75 @@ switch ($data["task"]) {
             } else {
                 echo json_encode(['status' => false, "agents" => $result]);
             }
+            $dbh = null;
+        } catch (PDOException $e) {
+            echo json_encode(['status' => false]);
+            die();
+        }
+        break;
+    case 'getAgentInform':
+        try {
+            $dbh = new PDO($connectData, $DBuser, $DBpassword);
+            $id = $data['id'];
+            $stmt = $dbh->prepare("SELECT `first_name`, `last_name`, `surename`, `born_date`, `gender`, `family_status`, `childs`, `academic_degree`, `user_id`, `post`, `discipline_id` FROM `employees`where user_id = $id");
+            $stmt->execute([]);
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            if ($result) {
+                echo json_encode(['status' => true, "agent" => $result]);
+            } else {
+                echo json_encode(['status' => false, "agents" => $result]);
+            }
+            $dbh = null;
+        } catch (PDOException $e) {
+            echo json_encode(['status' => false]);
+            die();
+        }
+        break;
+    case 'getPostAndDisciplineData':
+        try {
+            $dbh = new PDO($connectData, $DBuser, $DBpassword);
+
+            $stmt = $dbh->prepare("SELECT * FROM `posts`");
+            $stmt->execute([]);
+            $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $stmt = $dbh->prepare("SELECT * FROM `disciplines`");
+            $stmt->execute([]);
+            $discipline = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            if ($posts && $discipline) {
+                echo json_encode(['status' => true, "posts" => $posts, "discipline" => $discipline]);
+            } else {
+                echo json_encode(['status' => false]);
+            }
+            $dbh = null;
+        } catch (PDOException $e) {
+            echo json_encode(['status' => false]);
+            die();
+        }
+        break;
+    case 'removeAgent':
+        try {
+            if (!$data['id']) {
+                echo json_encode(["status" => false, "message" => "id не указан"]);
+                die();
+            }
+            $dbh = new PDO($connectData, $DBuser, $DBpassword);
+
+            $stmt = $dbh->prepare("DELETE FROM `users` WHERE id=?");
+            $stmt->execute([$data['id']]);
+
+            $stmt = $dbh->prepare("SELECT id FROM `users` WHERE id=?");
+            $stmt->execute([$data['id']]);
+            $res = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            if (!$res[0]["id"]) {
+                echo json_encode(["status" => true, "message" => "Удаление прошло успешно"]);
+            } else {
+                echo json_encode(["status" => false, "message" => "Удаление не прошло"]);
+            }
+
             $dbh = null;
         } catch (PDOException $e) {
             echo json_encode(['status' => false]);

@@ -33,7 +33,6 @@
         </header>
 
         <main>
-
         </main>
 
         <footer>

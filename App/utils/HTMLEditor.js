@@ -134,7 +134,7 @@ export default class HTMLEditor {
 
 
                     } catch (e) {
-                        console.log("error, maybe the depth was -1", e);
+                        console.log("error, maybe the depth was -1", this.depth);
                     }
                 }
                 this.state = 'rTex';

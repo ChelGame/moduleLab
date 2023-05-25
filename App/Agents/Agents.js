@@ -1,4 +1,6 @@
 import HTMLEditor from "/App/utils/HTMLEditor.js";
+import Add from "./Add/Add.js";
+import Message from "/App/utils/Message.js";
 
 /*
 
@@ -19,6 +21,8 @@ import HTMLEditor from "/App/utils/HTMLEditor.js";
     6) Возможно понадобится модификация метода рендера страниц т.к. изменение будет происходить в другом компоненте.
         6.1) Если страница не будет рендериться как надо, то заменить полное совпадение на частичное. (через регулярку наверное)
 
+
+    (Если успеем, добавить сортировку)
 */
 
 class Agents {
@@ -43,23 +47,248 @@ class Agents {
             <p>Дети: <span class="agent_childs"></span></p>
             <p>Должность: <span class="agent_post"></span></p>
             <p>Академическая степень: <span class="agent_academic-degree"></span></p>
+            <p>Направление: <span class="discipline"></span></p>
             <a href="/add" type="button" name="change">Изменить данные</a>
+            <a href="/remove" type="button" name="remove">Удалить сотрудника</a>
         </li>
+        `;
+        this.remove = `
+        <div class="removeCon">
+            <div class="remove">
+                <h2>Вы уверены, что хотите удалить этого сотрудника?</h2>
+                <div class="removeButtonCon">
+                    <button type="button" name="remove">Удалить</button>
+                    <button type="button" name="cancel">Отмена</button>
+                </div>
+            </div>
+        </div>
         `;
         this.selfEditor = new HTMLEditor(this.html);
         this.cardEditor = new HTMLEditor(this.card);
+        this.removeEditor = new HTMLEditor(this.remove);
+        this.message = new Message();
         this.agents = null;
 
         this.ComponentStart();
     }
 
+
+
+    ComponentStart() {
+        this.setState(this.getState());
+        this.checkAuth();
+
+        this.selfEditor.HTMLParser();
+        this.cardEditor.HTMLParser();
+        this.removeEditor.HTMLParser();
+
+        this.checkURL();
+        // В HTMLEditor лучше не лезть без особой необходимости. Писал я его давно.
+        // Причем так, чтобы не пришлось лезть.
+        // В начале файла есть комент с алгоритмом использование
+    }
+
+    checkURL() {
+
+        let url = '/' + this.state.url.split('/')[1].split('?')[0];
+        let id = this.state.url.split('/')[1].split('?')[1];
+        if (id) {
+            id = id.split("=")[1] || null;
+        }
+        switch (url) {
+            case "/add":
+                if (!this.state.auth) break;
+                if (this.state.auth.role === "Профком") break;
+
+                let add = new Add(this, id);
+                this.render(add.getContent());
+                return;
+            case "/agents":
+                this.selfEditor.HTMLPrinter(this.self);
+                this.setAgentsEvents();
+
+                return;
+            default:
+                break;
+        }
+        // this.setState({url: "/main"});
+    }
+
+    async getAgents() {
+        const data = {
+            task: "getAgents",
+        };
+        const url = './App/php/agents.php';
+
+        let response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8'
+            },
+            body: JSON.stringify(data)
+        });
+
+        let result = await response.json();
+        if (result.status) {
+            this.agents = result.agents;
+        }
+        this.printAgents();
+
+        return this.agents;
+    }
+    async removeAgent(e) {
+        let user_id = e.target.href.split("?")[1].split("=")[1];
+        let remove = this.removeEditor.findElementByParameter('[name="remove"]');
+        let cancel = this.removeEditor.findElementByParameter('[name="cancel"]');
+        remove.self.addEventListener("click", async () => {
+            let data = {
+                task: "removeAgent",
+                id: user_id,
+            };
+            let url = './App/php/agents.php';
+
+            let response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json;charset=utf-8'
+                },
+                body: JSON.stringify(data)
+            });
+            let result = await response.json();
+            if (result.status) {
+
+                let message = result.message || "Пользователь удален";
+                this.message.printMessage(message);
+                this.self.querySelectorAll(".item_agents").forEach((item) => {
+                    if (item.tagName == "A") {
+                        return;
+                    } else {
+                        this.selfEditor.findElementByParameter('.list_agents').self.removeChild(item);
+                    }
+                });
+
+                data = {
+                    task: "getAgents",
+                };
+                url = './App/php/agents.php';
+
+                response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json;charset=utf-8'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                result = await response.json();
+                if (result.status) {
+                    this.agents = result.agents;
+                }
+                this.printAgents();
+
+            } else {
+
+                let message = result["message"] || "Пользователь не был удален";
+                this.message.printMessage(message);
+            }
+            document.querySelector('body').removeChild(this.removeEditor.findElementByParameter(".removeCon").self);
+
+            this.removeEditor.reset(this.remove);
+            this.removeEditor.HTMLParser();
+        });
+        cancel.self.addEventListener("click", async () => {
+            document.querySelector('body').removeChild(this.removeEditor.findElementByParameter(".removeCon").self);
+
+            this.removeEditor.reset(this.remove);
+            this.removeEditor.HTMLParser();
+        });
+
+        this.removeEditor.HTMLPrinter(document.querySelector('body'));
+    }
+    changeAgent(e) {
+        let id = e.target.href.split("?")[1].split("=")[1];
+        let url = `/add?id=${id}`;
+
+        this.app.setState({url});
+    }
+
+    setAgentsEvents() {
+        if (this.state.auth.role !== "Профком") {
+            this.selfEditor.findElementByParameter('[name=add]').self.addEventListener("click", () => {
+                event.preventDefault();
+                this.app.setState({url: event.target.attributes[1].nodeValue});
+            });
+        } else {
+            this.selfEditor.findElementByParameter('[name=add]').self.hidden = true;
+        }
+
+        this.getAgents();
+    }
+
+    printAgents() {
+        this.selfEditor.findElementByParameter(".emptyLab").self.hidden = true;
+        this.agents.forEach((item, i) => {
+            this.cardEditor.reset(this.card);
+            this.cardEditor.HTMLParser();
+
+            this.cardEditor.findElementByParameter('.agent_name').self.textContent = `
+                ${item.first_name} ${item.last_name} ${item.surename}
+            `;
+            this.cardEditor.findElementByParameter('.agent_born-date').self.textContent = `
+                ${item.born_date}
+            `;
+            this.cardEditor.findElementByParameter('.agent_gender').self.textContent = `
+                ${item.gender}
+            `;
+            this.cardEditor.findElementByParameter('.agent_family-status').self.textContent = `
+                ${item.family_status}
+            `;
+            this.cardEditor.findElementByParameter('.agent_childs').self.textContent = `
+                ${item.childs}
+            `;
+            this.cardEditor.findElementByParameter('.agent_post').self.textContent = `
+                ${item.post}
+            `;
+            this.cardEditor.findElementByParameter('.agent_academic-degree').self.textContent = `
+                ${item.academic_degree}
+            `;
+            this.cardEditor.findElementByParameter('.discipline').self.textContent = `
+                ${item.discipline}
+            `;
+
+            if (this.state.auth.role !== "Профком") {
+                this.cardEditor.findElementByParameter('[name="change"]').params.href +=`?id=${item.user_id}`;
+                this.cardEditor.findElementByParameter('[name="remove"]').params.href +=`?id=${item.user_id}`;
+                this.cardEditor.findElementByParameter('[name="change"]').self.addEventListener("click", (event) => {
+                    event.preventDefault();
+                    this.changeAgent(event);
+                });
+                this.cardEditor.findElementByParameter('[name="remove"]').self.addEventListener("click", (event) => {
+                    event.preventDefault();
+                    this.removeAgent(event);
+                });
+            } else {
+                this.cardEditor.findElementByParameter('[name="change"]').params.class = 'disnone';
+                this.cardEditor.findElementByParameter('[name="remove"]').params.class = 'disnone';
+            }
+
+            this.cardEditor.HTMLPrinter(this.selfEditor.findElementByParameter(".list_agents").self);
+        });
+    }
+
+    getContent() {
+        return this.self;
+    }
+
+    render(content) {
+        this.self.innerHTML = "";
+        this.self.append(content);
+    }
+
     // general state funcs
     async checkAuth() {
-
-        if (this.state.auth) {
-            let result = await this.getAuthFromServer();
-            this.setAuthToState(result);
-        }
+        let result = await this.getAuthFromServer();
+        this.setAuthToState(result);
     }
     async getAuthFromServer() {
         const data = {
@@ -106,115 +335,6 @@ class Agents {
     }
     setState(state) {
         this.state = {...this.state, ...state};
-    }
-
-    ComponentStart() {
-        this.setState(this.getState());
-        this.checkAuth();
-
-        this.selfEditor.HTMLParser();
-        this.cardEditor.HTMLParser();
-        this.checkURL();
-        // В HTMLEditor лучше не лезть без особой необходимости. Писал я его давно.
-        // Причем так, чтобы не пришлось лезть.
-        // В начале файла есть комент с алгоритмом использование
-    }
-
-    checkURL() {
-        let url = '/' + this.state.url.split('/')[1].split('?')[0];
-        switch (url) {
-            case "/add":
-
-                break;
-            case "/agents":
-                this.selfEditor.HTMLPrinter(this.self);
-                this.setAgentsEvents();
-
-                break;
-            default:
-
-        }
-    }
-
-    async getAgents() {
-        const data = {
-            task: "getAgents",
-        };
-        const url = './App/php/agents.php';
-
-        let response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json;charset=utf-8'
-            },
-            body: JSON.stringify(data)
-        });
-
-        let result = await response.json();
-        if (result.status) {
-            this.agents = result.agents;
-        }
-        this.printAgents();
-
-        return this.agents;
-    }
-
-    setAgentsEvents() {
-        if (this.state.auth.role !== "Профком") {
-            this.selfEditor.findElementByParameter('[name=add]').self.addEventListener("click", () => {
-                event.preventDefault();
-                this.app.setState({url: event.target.attributes[1].nodeValue});
-            });
-        } else {
-            this.selfEditor.findElementByParameter('[name=add]').self.hidden = true;
-        }
-
-        this.getAgents();
-    }
-
-    printAgents() {
-        this.selfEditor.findElementByParameter(".emptyLab").self.hidden = true;
-        this.agents.forEach((item, i) => {
-            this.cardEditor.reset(this.card);
-            this.cardEditor.HTMLParser();
-
-            this.cardEditor.findElementByParameter('.agent_name').self.textContent = `
-                ${item.first_name} ${item.last_name} ${item.surename}
-            `;
-            this.cardEditor.findElementByParameter('.agent_born-date').self.textContent = `
-                ${item.born_date}
-            `;
-            this.cardEditor.findElementByParameter('.agent_gender').self.textContent = `
-                ${item.gender}
-            `;
-            this.cardEditor.findElementByParameter('.agent_family-status').self.textContent = `
-                ${item.family_status}
-            `;
-            this.cardEditor.findElementByParameter('.agent_childs').self.textContent = `
-                ${item.childs}
-            `;
-            this.cardEditor.findElementByParameter('.agent_post').self.textContent = `
-                ${item.post}
-            `;
-            this.cardEditor.findElementByParameter('.agent_academic-degree').self.textContent = `
-                ${item.academic_degree}
-            `;
-
-            if (this.state.auth.role === "Профком") {
-                this.cardEditor.findElementByParameter('[name="change"]').self.href +=`?id=${item.user_id}`;
-            }
-
-            this.cardEditor.HTMLPrinter(this.selfEditor.findElementByParameter(".list_agents").self);
-        });
-    }
-
-    getContent() {
-        return this.self;
-    }
-
-    render(content) {
-        this.self.innerHTML = "";
-        this.self.append(content);
     }
 }
 
