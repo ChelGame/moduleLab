@@ -250,7 +250,8 @@ footer a, footer p {
 }
 
 /* Articles */
-.articles_container {
+.articles_container, .Articles_component {
+    width: 100%;
 }
 
 .articles_container nav {
@@ -261,9 +262,13 @@ footer a, footer p {
     flex-direction: column;
     justify-content: center;
     flex-wrap: wrap;
+    transform: translateX(-80%);
     box-shadow: 0 0 5px 0;
 
     transition: .2s;
+}
+.articles_container nav:hover {
+    transform: translateX(0);
 }
 
 .search_con {
@@ -332,10 +337,29 @@ footer a, footer p {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: space-between;
     padding: 50px 0;
 }
 
 .item_article {
+    margin-bottom: 20px;
+    border-radius: 10px;
+
+    box-shadow: 0 0 10px 0;
+
+    cursor: pointer;
+}
+
+.articleLink {
+    display: block;
+    padding: 20px;
+}
+
+.item_article:nth-last-child(1) {
+    margin-bottom: 0;
+}
+
+.AddArticle {
     padding: 20px;
     margin-bottom: 20px;
     border-radius: 10px;
@@ -345,8 +369,12 @@ footer a, footer p {
     cursor: pointer;
 }
 
-.item_article:nth-last-child(1) {
-    margin-bottom: 0;
+.add_container textarea {
+    width: 100%;
+    box-shadow: 0 0 5px 0;
+    border-radius: 5px;
+    margin-top: 10px;
+    padding: 20px;
 }
 
 /* Agents */

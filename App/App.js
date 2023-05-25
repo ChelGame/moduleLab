@@ -61,8 +61,16 @@ class App {
                     this.render(auth.getContent());
                     return;
                 case "/articles":
-                    let articles = new Articles();
+                    let articles = new Articles(this);
                     this.render(articles.getContent());
+                    return;
+                case "/addArticles":
+                    let addArticles = new Articles(this);
+                    this.render(addArticles.getContent());
+                    return;
+                case "/viewArticle":
+                    let viewArticle = new Articles(this);
+                    this.render(viewArticle.getContent());
                     return;
                 case "/agents":
                     if (!this.state.auth) break;

@@ -285,6 +285,7 @@ class Agents {
         this.self.append(content);
     }
 
+
     // general state funcs
     async checkAuth() {
         let result = await this.getAuthFromServer();
