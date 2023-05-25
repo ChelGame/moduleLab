@@ -146,7 +146,7 @@ class Articles {
                 this.app.setState({url: event.target.attributes[1].nodeValue});
             });
         } else {
-            this.selfEditor.findElementByParameter('[name=add]').self.hidden = true;
+            this.selfEditor.findElementByParameter('[name=addArticles]').self.hidden = true;
         }
 
         this.getArticles();
