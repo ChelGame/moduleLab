@@ -1,6 +1,10 @@
 import HTMLEditor from "/App/utils/HTMLEditor.js";
 import AddArticles from "./addArticles/addArticles.js";
+import ViewArticle from "./ViewArticle/ViewArticle.js";
 import Message from "/App/utils/Message.js";
+
+// По улучшению. Можно сделать комбинаторы, чтоб искать по нескольким словам но не одновременно. Типа как или картошка, или огурец, или салат. (+ ~ > < - (sdsda));
+
 
 class Articles {
     constructor(App) {
@@ -11,10 +15,10 @@ class Articles {
         this.html = `
         <section class="articles_container fixed_container">
             <nav>
-                <div class="search_con">
+                <form class="search_con">
                     <input class="search_input" type="text" name="searchArticles" value="" placeholder="Название или фраза">
-                    <button class="search_button" type="button" name="searchArticlesButton"></button>
-                </div>
+                    <button class="search_button" type="submit" name="searchArticlesButton"></button>
+                </form>
                 <div class="button_group">
                     <button class="prev" type="button" name="prevArticle"></button>
                     <button class="read" type="button" name="readArticle"></button>
@@ -30,10 +34,15 @@ class Articles {
         `;
         this.card = `
         <li class="item_article">
-            <a href="/viewArticle" class="articleLink">
-                <h2 class="article_name">Квантование лазерных пучков и их синергетика с квантами нагретой плазмы</h2>
-                <p class="article_description">В статье разобраны базовые принципы квантования лазерных пучков в разных конфигурациях а также их синергии с нагретой плазмой</p>
+            <a href="/App/files/articles/" class="articleLink">
+                <h2 class="article_name"></h2>
+                <p class="article_description"></p>
             </a>
+            <div class="grade_con">
+                <button class="grade_but" type="Button" name="up">Понравилось</button>
+                <span class="grade_count"></span>
+                <button class="grade_but" type="Button" name="down">Не понравилось</button>
+            </div>
         </li>
         `;
         this.selfEditor = new HTMLEditor(this.html);
@@ -61,10 +70,11 @@ class Articles {
     checkURL() {
 
         let url = '/' + this.state.url.split('/')[1].split('?')[0];
-        let id = this.state.url.split('/')[1].split('?')[1];
-        if (id) {
-            id = id.split("=")[1] || null;
-        }
+        let query = this.state.url.split('/')[1].split('?')[1];
+        // let id = this.state.url.split('/')[1].split('?')[1];
+        // if (id) {
+        //     id = id.split("=")[1] || null;
+        // }
         switch (url) {
             case "/addArticles":
                 if (!this.state.auth) break;
@@ -76,22 +86,33 @@ class Articles {
             case "/articles":
                 this.selfEditor.HTMLPrinter(this.self);
                 this.setArticleEvents();
+                if (!query) {
+                    this.getArticles();
+                } else {
+                    this.getArticles(query);
+                }
 
                 return;
-            case "/viewArticle":
-                let viewArticle = new ViewArticle(this, id);
-                this.render(viewArticle.getContent());
+            // case "/viewArticle":
+            //     let viewArticle = new ViewArticle(this, id);
+            //     this.render(viewArticle.getContent());
 
-                return;
+                // return;
             default:
                 break;
         }
         this.app.setState({url: "/main"});
     }
 
-    async getArticles() {
+    async grade(id, grade, event) {
+        if (!this.state.auth) {
+            this.message.printMessage("Сначала авторизуйтесь");
+            return;
+        }
         const data = {
-            task: "getArticles",
+            task: "grade",
+            id,
+            grade,
         };
         const url = './App/php/articles.php';
 
@@ -102,36 +123,103 @@ class Articles {
 
         let result = await response.json();
         if (result.status) {
+            let con = this.self.querySelector(`[data-key="${id}"]`);
+
+            con.querySelector('.grade_count').textContent = result.score || 0;
+
+            switch (result.selected) {
+                case 'set':
+                    event.target.classList.add("grade_selected");
+                    break;
+                case 'change':
+                    con.querySelectorAll('.grade_but').forEach((item) => {
+                        item.classList.remove('grade_selected')
+                    });
+                    event.target.classList.add("grade_selected");
+
+                    break;
+                case 'remove':
+                    this.self.querySelector(`[data-key="${id}"]`).querySelectorAll('.grade_but').forEach((item) => {
+                        item.classList.remove('grade_selected');
+                    });
+                    break;
+                default:
+
+            }
+            return;
+        }
+        this.message.printMessage(result.message || "Что-то пошло не так");
+        return false;
+    }
+
+    async getArticles(query = null) {
+        if (query) {
+            query = query.split("=")[1].trim();
+        }
+        const data = {
+            task: "getArticles",
+            query,
+        };
+        const url = './App/php/articles.php';
+
+        let response = await fetch(url, {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+
+        let result = await response.json();
+
+        if (result.status) {
             this.articles = result.articles;
             this.printArticles();
             return result.articles;
         }
+        this.message.printMessage(result.message || "Что-то пошло не так");
         return false;
     }
+
     printArticles() {
         this.selfEditor.findElementByParameter(".emptyLab").self.hidden = true;
 
         this.articles.forEach((item, i) => {
             this.cardEditor.reset(this.card);
             this.cardEditor.HTMLParser();
+            this.cardEditor.findElementByParameter('h2').self.textContent = `${item.name}`;
+            this.cardEditor.findElementByParameter('.item_article').self.dataset.key = `${item.article_id}`;
+            this.cardEditor.findElementByParameter('.grade_count').self.textContent = `${item.rate || 0}`;
+            if (item.user_rate) {
+                switch (item.user_rate) {
+                    case '-1':
+                        this.cardEditor.findElementByParameter('[name="down"]').params.class += ' grade_selected';
+                        break;
+                    case '1':
+                        this.cardEditor.findElementByParameter('[name="up"]').params.class += ' grade_selected';
+                        break;
+                    default:
 
-            this.cardEditor.findElementByParameter('h2').self.textContent = `
-                ${item.name}
-            `;
-            this.cardEditor.findElementByParameter('.article_description').self.textContent = `
-                ${item.description}
-            `;
+                }
+            }
+            this.cardEditor.findElementByParameter('.article_description').self.textContent = `${item.description}`;
 
-            this.cardEditor.findElementByParameter('.articleLink').params.href +=`?id=${item.article_id}`;
+            this.cardEditor.findElementByParameter('.articleLink').params.href +=`${item.link}`;
             this.cardEditor.findElementByParameter('.articleLink').self.addEventListener("click", (event) => {
                 event.preventDefault();
                 for (let i = 0; i < event.path.length; i++) {
                     if (event.path[i].tagName === "A") {
-                        console.log(event.path[i].href);
+                        window.location.assign(event.path[i].attributes["href"].nodeValue);
                         return;
                     }
                 }
 
+            });
+
+            this.cardEditor.findElementByParameter('[name="up"]').self.addEventListener("click", (event) => {
+                event.preventDefault();
+                this.grade(item.article_id, 1, event);
+            });
+            this.cardEditor.findElementByParameter('[name="down"]').self.addEventListener("click", (event) => {
+                event.preventDefault();
+                this.grade(item.article_id, -1, event);
             });
 
             this.cardEditor.HTMLPrinter(this.selfEditor.findElementByParameter(".list_article").self);
@@ -149,9 +237,12 @@ class Articles {
             this.selfEditor.findElementByParameter('[name=addArticles]').self.hidden = true;
         }
 
-        this.getArticles();
+        this.selfEditor.findElementByParameter(".search_con").self.addEventListener("submit", () => {
+            event.preventDefault();
+            let keyWords = this.selfEditor.findElementByParameter(".search_input").self.value.toLowerCase();
+            this.app.setState({url: this.state.url.split("?")[0] + "?search=" + keyWords});
+        })
     }
-
 
     getContent() {
         return this.self;

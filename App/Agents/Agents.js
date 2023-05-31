@@ -216,7 +216,7 @@ class Agents {
         if (this.state.auth.role !== "Профком") {
             this.selfEditor.findElementByParameter('[name=add]').self.addEventListener("click", () => {
                 event.preventDefault();
-                this.app.setState({url: event.target.attributes[1].nodeValue});
+                this.app.setState({url: event.target.attributes['href'].nodeValue});
             });
         } else {
             this.selfEditor.findElementByParameter('[name=add]').self.hidden = true;

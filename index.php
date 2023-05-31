@@ -9,6 +9,7 @@
         <link rel="stylesheet" href="./css/media.css">
         <script type="module" defer src="./App/App.js"></script>
         <script src="https://www.google.com/recaptcha/api.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/pdf.js/2.0.943/pdf.min.js"></script>
     </head>
     <body>
         <header>

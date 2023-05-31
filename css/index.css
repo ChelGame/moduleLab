@@ -267,7 +267,7 @@ footer a, footer p {
 
     transition: .2s;
 }
-.articles_container nav:hover {
+.articles_container nav:hover, .search_input:focus ~ nav:hover {
     transform: translateX(0);
 }
 
@@ -342,12 +342,11 @@ footer a, footer p {
 }
 
 .item_article {
+    width: 100%;
     margin-bottom: 20px;
     border-radius: 10px;
 
     box-shadow: 0 0 10px 0;
-
-    cursor: pointer;
 }
 
 .articleLink {
@@ -376,6 +375,42 @@ footer a, footer p {
     margin-top: 10px;
     padding: 20px;
 }
+
+.article_description {
+    overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 4;
+        -webkit-box-orient: vertical;
+}
+
+.grade_con {
+    display: flex;
+
+    padding: 20px;
+}
+
+.grade_con button {
+    padding: 10px 20px;
+    border-radius: 5px;
+    margin: 0 10px;
+
+
+    background-color: #fff;
+    box-shadow: 0 0 5px 0;
+}
+
+.grade_count {
+    margin: 0 10px;
+    text-align: center;
+    align-self: center;
+}
+
+.grade_selected {
+    background-color: #f00 !important;
+    color: #fff;
+}
+
 
 /* Agents */
 
@@ -515,4 +550,10 @@ footer a, footer p {
     color: #000;
 
     box-shadow: 0 0 5px 0;
+}
+
+/* ViewArticle */
+
+#pdf_renderer {
+    width: 100%;
 }
