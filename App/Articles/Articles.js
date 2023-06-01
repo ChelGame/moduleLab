@@ -29,6 +29,9 @@ class Articles {
             <ul class="list_article">
                 <a class="AddArticle" href="/addArticles" type="button" name="addArticles">Добавить статью</a>
                 <div class="emptyLab">Статей пока нет.</div>
+                <div class="page_pad">
+
+                </div>
             </ul>
         </section>
         `;
@@ -49,6 +52,7 @@ class Articles {
         this.cardEditor = new HTMLEditor(this.card);
         this.message = new Message();
         this.articles = null;
+        this.pages = 1;
 
         this.ComponentStart();
     }
@@ -71,10 +75,10 @@ class Articles {
 
         let url = '/' + this.state.url.split('/')[1].split('?')[0];
         let query = this.state.url.split('/')[1].split('?')[1];
-        // let id = this.state.url.split('/')[1].split('?')[1];
-        // if (id) {
-        //     id = id.split("=")[1] || null;
-        // }
+        let id = this.state.url.split('/')[1].split('?')[1];
+        if (id) {
+            id = id.split("=")[1] || null;
+        }
         switch (url) {
             case "/addArticles":
                 if (!this.state.auth) break;
@@ -153,12 +157,24 @@ class Articles {
     }
 
     async getArticles(query = null) {
+        let page = 0;
+        let search = null;
         if (query) {
-            query = query.split("=")[1].trim();
+            let sReg = /search=[^&]+&?/;
+            let pReg = /page=\d+&?/;
+            search = query.match(sReg);
+            page = query.match(pReg);
+            if (search) {
+                search = search[0].split("=")[1].replace("&", "").trim();
+            }
+            if (page) {
+                page = page[0].split("=")[1];
+            }
         }
         const data = {
             task: "getArticles",
-            query,
+            search,
+            page
         };
         const url = './App/php/articles.php';
 
@@ -171,6 +187,8 @@ class Articles {
 
         if (result.status) {
             this.articles = result.articles;
+            this.pages = Math.ceil(result.articles_count / 10);
+            this.currentPage = page;
             this.printArticles();
             return result.articles;
         }
@@ -179,6 +197,9 @@ class Articles {
     }
 
     printArticles() {
+        let but = `<button class="page_number"></button>`;
+        let pages = this.pages;
+        let curPage = this.currentPage || 1;
         this.selfEditor.findElementByParameter(".emptyLab").self.hidden = true;
 
         this.articles.forEach((item, i) => {
@@ -224,6 +245,63 @@ class Articles {
 
             this.cardEditor.HTMLPrinter(this.selfEditor.findElementByParameter(".list_article").self);
         });
+
+        const butEditor = new HTMLEditor(but);
+
+        // Первая и последняя страница отрисовываются точно.
+        // Две страницы слева и справа от текущей тоже отрисовываются.
+        if (pages <= 10) {
+            for (let i = 1; i <= pages; i++) {
+                butEditor.reset(but);
+                butEditor.HTMLParser();
+                if (curPage == i) butEditor.findElementByParameter(".page_number").params.class += " grade_selected";
+                butEditor.findElementByParameter(".page_number").params['data-key'] = i;
+
+                butEditor.findElementByParameter(".page_number").self.textContent = i;
+                butEditor.findElementByParameter(".page_number").self.addEventListener('click', () => {
+                    this.state.url = this.state.url.split('page=')[0];
+                    if (this.state.url.split("?")[1]) {
+                        this.state.url = this.state.url.replace('&', '');
+                        this.app.setState({url: this.state.url + "&page=" + i});
+                    } else {
+                        this.state.url = this.state.url.replace('?', '');
+                        this.app.setState({url: this.state.url + "?page=" + i});
+                    }
+                });
+                butEditor.HTMLPrinter(this.selfEditor.findElementByParameter('.page_pad').self);
+            }
+        } else {
+            for (let i = 1; i <= pages; i++) {
+                if (i >= curPage - 3 &&
+                    i <= curPage + 3 ||
+                    i == 1 ||
+                    i == pages
+                ) {
+                    butEditor.reset(but);
+                    butEditor.HTMLParser();
+                    butEditor.findElementByParameter(".page_number").params['data-key'] = i;
+                    if (curPage == i) butEditor.findElementByParameter(".page_number").params.class += " grade_selected";
+                    butEditor.findElementByParameter(".page_number").self.textContent = i;
+                    butEditor.findElementByParameter(".page_number").self.addEventListener('click', () => {
+                        this.state.url = this.state.url.split('page=')[0];
+                        this.state.url = this.state.url.replace('&', '');
+                        if (this.state.url.split("?")[1]) {
+                            this.app.setState({url: this.state.url + "&page=" + i});
+                        } else {
+                            this.app.setState({url: this.state.url + "?page=" + i});
+                        }
+                    });
+                    butEditor.HTMLPrinter(this.selfEditor.findElementByParameter('.page_pad').self);
+                } else if (i == curPage - 4 ||
+                    i == curPage + 4) {
+                    butEditor.reset(but);
+                    butEditor.HTMLParser();
+                    butEditor.findElementByParameter(".page_number").self.textContent = `...`;
+                    butEditor.HTMLPrinter(this.selfEditor.findElementByParameter('.page_pad').self);
+                }
+
+            }
+        }
     }
 
     setArticleEvents() {
@@ -240,7 +318,11 @@ class Articles {
         this.selfEditor.findElementByParameter(".search_con").self.addEventListener("submit", () => {
             event.preventDefault();
             let keyWords = this.selfEditor.findElementByParameter(".search_input").self.value.toLowerCase();
-            this.app.setState({url: this.state.url.split("?")[0] + "?search=" + keyWords});
+            if (keyWords) {
+                this.app.setState({url: this.state.url.split("?")[0] + "?search=" + keyWords});
+            } else {
+                this.message.printMessage('Введите запрос');
+            }
         })
     }
 

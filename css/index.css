@@ -411,6 +411,31 @@ footer a, footer p {
     color: #fff;
 }
 
+.page_pad {
+    display: flex;
+    justify-content: center;
+    max-width: 1000px;
+
+    margin: 20px 0;
+}
+
+.page_number {
+    max-width: 50px;
+    min-width: 50px;
+    width: 50px;
+    max-height: 50px;
+    min-height: 50px;
+    height: 50px;
+
+    margin: 0 10px;
+    border-radius: 5px;
+
+    font-size: 16px;
+    text-align: center;
+    align-self: center;
+    box-shadow: 0 0 5px 0;
+}
+
 
 /* Agents */
 

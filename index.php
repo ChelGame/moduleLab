@@ -7,6 +7,7 @@
         <link type="image/x-icon" href="./img/icon.ico">
         <link rel="stylesheet" href="./css/index.css">
         <link rel="stylesheet" href="./css/media.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
         <script type="module" defer src="./App/App.js"></script>
         <script src="https://www.google.com/recaptcha/api.js"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/pdf.js/2.0.943/pdf.min.js"></script>

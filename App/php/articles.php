@@ -74,9 +74,9 @@ switch ($task) {
         try {
             $sql = "SELECT `articles`.`id`, `name`, `description`, `link`, `author_id`, `article_id` FROM `articles`, `article_user` WHERE article_id = `articles`.`id`";
             $values = [];
-            if ($data["query"]) {
+            if ($data["search"]) {
                 $sql .= " AND (INSTR(name, ?) OR INSTR(description, ?))";
-                array_push($values, $data["query"], $data["query"]);
+                array_push($values, $data["search"], $data["search"]);
             }
             $step = 10;
             $llim = 0;
@@ -115,7 +115,7 @@ switch ($task) {
             // Количество статей
             $stmt = $dbh->prepare("SELECT COUNT(*) as articles_count FROM `articles`");
             $stmt->execute([]);
-            $articles_count = $stmt->fetchAll(PDO::FETCH_ASSOC)[0];
+            $articles_count = $stmt->fetchAll(PDO::FETCH_ASSOC)[0]['articles_count'];
             if (!$res) {
                 echo json_encode(['status' => false, "message" => "Не нашлось ни одной подходящей статьи"]);
             } else {
