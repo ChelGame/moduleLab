@@ -15,7 +15,7 @@
     <body>
         <header>
             <section class="logo_container">
-                <a href="./index.html"><img class="logo_image" src="./img/icon.ico" alt="colb"></a>
+                <a href="/main" data-historyLink><img class="logo_image" src="./img/icon.ico" alt="colb"></a>
             </section>
             <section class="page_container">
                 <h1 class="page_name">Модуль "Лаборатория"</h1>
@@ -39,7 +39,7 @@
 
         <footer>
             <section class="logo_container">
-                <a href="./index.html"><img class="logo_image" src="./img/icon.ico" alt="colb"></a>
+                <a href="/main" data-historyLink><img class="logo_image" src="./img/icon.ico" alt="colb"></a>
             </section>
             <section class="navigation_container">
                 <nav>

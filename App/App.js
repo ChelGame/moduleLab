@@ -43,6 +43,7 @@ class App {
     // Подгружает контент страницы
     downloadPage() {
         try {
+            console.log(this.state.url);
             let url = '/' + this.state.url.split('/')[1].split('?')[0];
             switch (url) {
                 case "/add":
@@ -270,9 +271,9 @@ class App {
             // Подгрузка страниц
             historyLink.addEventListener("click", (event) => {
                 event.preventDefault();
-                if (event.target.attributes[1].nodeValue !== "/exit") {
+                if (event.currentTarget.attributes[1].nodeValue !== "/exit") {
                     const state = {
-                        url: event.target.attributes[1].nodeValue,
+                        url: event.currentTarget.attributes['href'].nodeValue,
                     }
                     this.setState(state);
                 }
