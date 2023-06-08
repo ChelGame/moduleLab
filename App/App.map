@@ -1,5 +1,6 @@
 App:
-    <- Auth
-    <- Main
     <- Agents
     <- Articles
+    <- Auth
+    <- Main
+    <- Register

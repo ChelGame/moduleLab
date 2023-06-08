@@ -39,6 +39,20 @@ class AddArticles {
         this.setAddEvent();
     }
 
+    checkAccess() {
+        // Мы должны быть авторизованы в роли администратора или сотрудника
+        if (!this.state.auth) {
+            this.message.printMessage("Вы не вошли в систему");
+            return false;
+        }
+        if (this.state.auth.role !== "Администратор"
+         && this.state.auth.role !== "Сотрудник") {
+            this.message.printMessage("У вас нет доступа к этой странице. Пожалуйста, перестаньте копаться в коде и искать обходные пути");
+            return false;
+        }
+        return true;
+    }
+
     setAddEvent() {
         let submitBut = this.editor.findElementByParameter('[name="submit"]');
         submitBut.self.addEventListener("click", (event) => {

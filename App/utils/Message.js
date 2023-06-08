@@ -15,9 +15,17 @@ export default class Message {
         this.timeout = null;
 
         this.self.addEventListener("click", () => {
-            this.removeMessage();
-            clearTimeout(this.timeout);
+            try {
+                this.removeMessage();
+                clearTimeout(this.timeout);
+            } catch (e) {}
         });
+        document.addEventListener(`keydown`, (event) => {
+            try {
+                this.removeMessage();
+                clearTimeout(this.timeout);
+            } catch (e) {}
+        }, false);
     }
 
     printMessage(message, timeout = 5000) {
@@ -39,8 +47,10 @@ export default class Message {
         try {
             this.self.classList.add("disnone");
             setTimeout(() => {
-                document.body.removeChild(this.self);
+                try {
+                    document.body.removeChild(this.self);
+                } catch (e) {}
             }, 200);
-        } catch (e) {} 
+        } catch (e) {}
     }
 }

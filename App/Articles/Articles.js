@@ -1,6 +1,5 @@
 import HTMLEditor from "/App/utils/HTMLEditor.js";
 import AddArticles from "./addArticles/addArticles.js";
-import ViewArticle from "./ViewArticle/ViewArticle.js";
 import Message from "/App/utils/Message.js";
 
 // По улучшению. Можно сделать комбинаторы, чтоб искать по нескольким словам но не одновременно. Типа как или картошка, или огурец, или салат. (+ ~ > < - (sdsda));
@@ -21,7 +20,6 @@ class Articles {
                 </form>
                 <div class="button_group">
                     <button class="prev" type="button" name="prevArticle"></button>
-                    <button class="read" type="button" name="readArticle"></button>
                     <button class="next" type="button" name="nextArticle"></button>
                 </div>
                 <button type="button" name="showMenu">></button>
@@ -42,6 +40,7 @@ class Articles {
                 <p class="article_description"></p>
             </a>
             <div class="grade_con">
+                <div class="article_info"><a href="" class="article_author"></a> <span class="article_date"></span></div>
                 <button class="grade_but" type="Button" name="up">Понравилось</button>
                 <span class="grade_count"></span>
                 <button class="grade_but" type="Button" name="down">Не понравилось</button>
@@ -72,20 +71,20 @@ class Articles {
     }
 
     checkURL() {
-
-        let url = '/' + this.state.url.split('/')[1].split('?')[0];
-        let query = this.state.url.split('/')[1].split('?')[1];
-        let id = this.state.url.split('/')[1].split('?')[1];
+        let component;
+        let url = this.state.url.split('?')[0];
+        let query = this.state.url.split('?')[1];
+        // let query = this.state.url.split('/')[1].split('?')[1];
+        let id = this.state.url.split('?')[1];
+        // let id = this.state.url.split('/')[1].split('?')[1];
         if (id) {
             id = id.split("=")[1] || null;
         }
         switch (url) {
             case "/addArticles":
-                if (!this.state.auth) break;
-                if (this.state.auth.role !== "Администратор"
-                 && this.state.auth.role !== "Сотрудник") break;
-                let addArticles = new AddArticles(this, id);
-                this.render(addArticles.getContent());
+                component = new AddArticles(this, id);
+                if (!component.checkAccess()) break;
+                this.render(component.getContent());
                 return;
             case "/articles":
                 this.selfEditor.HTMLPrinter(this.self);
@@ -95,13 +94,8 @@ class Articles {
                 } else {
                     this.getArticles(query);
                 }
-
                 return;
-            // case "/viewArticle":
-            //     let viewArticle = new ViewArticle(this, id);
-            //     this.render(viewArticle.getContent());
 
-                // return;
             default:
                 break;
         }
@@ -157,24 +151,34 @@ class Articles {
     }
 
     async getArticles(query = null) {
+        // Убрать двойной запрос при перезагрузке
         let page = 0;
         let search = null;
+        let author = null;
         if (query) {
             let sReg = /search=[^&]+&?/;
             let pReg = /page=\d+&?/;
+            let aReg = /author=[^&]+&?/;
             search = query.match(sReg);
             page = query.match(pReg);
+            author = query.match(aReg);
             if (search) {
                 search = search[0].split("=")[1].replace("&", "").trim();
             }
             if (page) {
                 page = page[0].split("=")[1];
             }
+            if (author) {
+                author = author[0].split("=")[1];
+            }
         }
+
+        this.selfEditor.findElementByParameter(".search_input").self.value = `${(search) ? search : ''} ${(author) ? '&author='+author : ''}`;
         const data = {
             task: "getArticles",
             search,
-            page
+            page,
+            author
         };
         const url = './App/php/articles.php';
 
@@ -186,7 +190,7 @@ class Articles {
         let result = await response.json();
 
         if (result.status) {
-            this.articles = result.articles;
+            this.articles = Object.values(result.articles);
             this.pages = Math.ceil(result.articles_count / 10);
             this.currentPage = page;
             this.printArticles();
@@ -201,7 +205,6 @@ class Articles {
         let pages = this.pages;
         let curPage = this.currentPage || 1;
         this.selfEditor.findElementByParameter(".emptyLab").self.hidden = true;
-
         this.articles.forEach((item, i) => {
             this.cardEditor.reset(this.card);
             this.cardEditor.HTMLParser();
@@ -221,6 +224,21 @@ class Articles {
                 }
             }
             this.cardEditor.findElementByParameter('.article_description').self.textContent = `${item.description}`;
+
+            if (item.first_name && item.last_name && item.surename) {
+                this.cardEditor.findElementByParameter('.article_author').self.textContent = `${item.last_name} ${item.first_name} ${item.surename}`;
+
+            } else {
+                this.cardEditor.findElementByParameter('.article_author').self.textContent = `Администратор`;
+            }
+            this.cardEditor.findElementByParameter('.article_author').params.href = `/articles?author=${this.cardEditor.findElementByParameter('.article_author').self.textContent}`;
+            this.cardEditor.findElementByParameter('.article_author').self.addEventListener('click', () => {
+                event.preventDefault();
+                this.app.setState({url: this.state.url.split("?")[0] + "?author=" + event.target.textContent});
+            });
+
+
+            this.cardEditor.findElementByParameter('.article_date').self.textContent = `${item.add_date}`;
 
             this.cardEditor.findElementByParameter('.articleLink').params.href +=`${item.link}`;
             this.cardEditor.findElementByParameter('.articleLink').self.addEventListener("click", (event) => {
@@ -303,7 +321,6 @@ class Articles {
             }
         }
     }
-
     setArticleEvents() {
         if (this.state.auth.role === "Администратор"
         ||  this.state.auth.role === "Сотрудник") {
@@ -323,13 +340,11 @@ class Articles {
             } else {
                 this.message.printMessage('Введите запрос');
             }
-        })
+        });
     }
-
     getContent() {
         return this.self;
     }
-
     render(content) {
         this.self.innerHTML = "";
         this.self.append(content);
@@ -358,7 +373,6 @@ class Articles {
 
         return await response.json();
     }
-    // Обобщающий метод, возвращающий состояние из наиболее доверенного источника.
     getState() {
         let initialState = {
             url: "/main",
@@ -374,7 +388,6 @@ class Articles {
         if (!window.history || !window.history.state) return null;
         return window.history.state["AppState"];
     }
-
     setAuthToState(result) {
         let state;
         if (result.auth) {

@@ -1,6 +1,6 @@
 import HTMLEditor from "/App/utils/HTMLEditor.js";
 import Message from "/App/utils/Message.js";
-
+// добавить вывод
 class Register {
     constructor(App) {
         this.app = App;
@@ -24,12 +24,21 @@ class Register {
     }
 
     ComponentStart() {
-        // В HTMLEditor лучше не лезть без особой необходимости. Писал я его давно.
-        // Причем так, чтобы не пришлось лезть.
-        // В начале файла есть комент с алгоритмом использование
+        this.setState(this.getState());
+        this.checkAuth();
+
         this.components = this.editor.HTMLParser();
         this.editor.HTMLPrinter(this.self);
         this.setRegisterEvents();
+    }
+
+    checkAccess() {
+        // Мы должны быть не авторизованы
+        if (this.state.auth) {
+            this.message.printMessage("Вы уже вошли в систему");
+            return false;
+        }
+        return true;
     }
 
     getContent() {
@@ -104,6 +113,63 @@ class Register {
         this.message.printMessage("Вы успешно зарегистрировались. Теперь вы можете авторизоваться", 10000);
         this.app.setState({url: '/auth'});
     }
+
+    // general state funcs
+    async checkAuth() {
+
+        if (this.state.auth) {
+            let result = await this.getAuthFromServer();
+            this.setAuthToState(result);
+        }
+    }
+    async getAuthFromServer() {
+        const data = {
+            task: "checkAuth",
+            auth: this.state.auth,
+        };
+        const url = './App/php/auth.php';
+
+        let response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8'
+            },
+            body: JSON.stringify(data)
+        });
+
+        return await response.json();
+    }
+    // Обобщающий метод, возвращающий состояние из наиболее доверенного источника.
+    getState() {
+        let initialState = {
+            url: "/main",
+            auth: false,
+        };
+        return this.getStateFromStorage() || this.getStateFromHistory() || initialState;
+    }
+    getStateFromStorage() {
+        if (!localStorage.length) return null;
+        return JSON.parse(localStorage.getItem("AppState"));
+    }
+    getStateFromHistory() {
+        if (!window.history || !window.history.state) return null;
+        return window.history.state["AppState"];
+    }
+
+    setAuthToState(result) {
+        let state;
+        if (result.auth) {
+            state = {...this.state, ...result};
+        } else {
+            state = {...this.state, auth: false};
+        }
+        this.setState(state);
+    }
+    setState(state) {
+        this.state = {...this.state, ...state};
+    }
+
+////////////////////////////////////////////////////////////////////
 }
 
 

@@ -32,8 +32,8 @@ switch ($task) {
             if (move_uploaded_file($_FILES['file']['tmp_name'], $uploadfile)) {
                 $dbh = new PDO($connectData, $DBuser, $DBpassword);
 
-                $stmt = $dbh->prepare("INSERT INTO `articles`(`name`, `description`, `link`) VALUES (?, ?, ?)");
-                $stmt->execute([$_POST["name"], $_POST["description"], $file_name]);
+                $stmt = $dbh->prepare("INSERT INTO `articles`(`name`, `description`, `link`, `add_date`) VALUES (?, ?, ?, ?)");
+                $stmt->execute([$_POST["name"], $_POST["description"], $file_name, date("Y-j-n")]);
 
                 // Проверяем
                 $stmt = $dbh->prepare("SELECT `id` FROM `articles` WHERE link = ?");
@@ -72,7 +72,7 @@ switch ($task) {
         break;
     case 'getArticles':
         try {
-            $sql = "SELECT `articles`.`id`, `name`, `description`, `link`, `author_id`, `article_id` FROM `articles`, `article_user` WHERE article_id = `articles`.`id`";
+            $sql = "SELECT `articles`.`id`, `name`, `description`, `link`, `author_id`, `article_id`, `add_date` FROM `articles`, `article_user` WHERE article_id = `articles`.`id`";
             $values = [];
             if ($data["search"]) {
                 $sql .= " AND (INSTR(name, ?) OR INSTR(description, ?))";
@@ -85,7 +85,7 @@ switch ($task) {
                 $llim = ($data['page'] - 1) * $step;
                 $rlim = $llim + $step;
             }
-            $sql .= " LIMIT " .$llim.", ".$rlim;
+            // $sql .= " LIMIT " .$llim.", ".$rlim;
 
             $dbh = new PDO($connectData, $DBuser, $DBpassword);
 
@@ -101,6 +101,7 @@ switch ($task) {
 
             // Добавляем оценки
             foreach ($res as $key => $value) {
+                // Возможно, лучше взять все записи и обработать их в php
                 $stmt = $dbh->prepare("SELECT SUM(rate) AS rate FROM `article_grade` WHERE article_id = ?");
                 $stmt->execute([$value['id']]);
                 $res[$key]['rate'] = $stmt->fetchAll(PDO::FETCH_ASSOC)[0]['rate'];
@@ -111,11 +112,70 @@ switch ($task) {
                 }
             }
 
-
-            // Количество статей
-            $stmt = $dbh->prepare("SELECT COUNT(*) as articles_count FROM `articles`");
+            // Получаем данные автора
+            $stmt = $dbh->prepare("SELECT `first_name`, `last_name`, `surename`, `user_id` FROM `employees`");
             $stmt->execute([]);
-            $articles_count = $stmt->fetchAll(PDO::FETCH_ASSOC)[0]['articles_count'];
+            $emp = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            foreach ($res as $key => $value) {
+                foreach ($emp as $ekey => $evalue) {
+                    if ($evalue['user_id'] == $value['author_id']) {
+                        $res[$key]['first_name'] = $evalue['first_name'];
+                        $res[$key]['last_name'] = $evalue['last_name'];
+                        $res[$key]['surename'] = $evalue['surename'];
+                    }
+                }
+            }
+
+            // Статьи автора
+            if ($data["author"]) {
+                if ($data['author'] == "Администратор") {
+                    $uid = 11;
+
+                    foreach ($res as $key => $value) {
+                        if ($value['author_id'] != $uid) {
+                            unset($res[$key]);
+                        }
+                    }
+                } else {
+                    $uid = null;
+                    $flag = false;
+
+                    $alist = explode(" ", $data["author"]);
+                    foreach ($emp as $ekey => $evalue) {
+                        $articles[$akey] = $avalue;
+                        foreach ($evalue as $avalueKey => $avalueValue) {
+                            if ($avalueKey != "user_id") {
+                                $flag = strripos($data['author'], $avalueValue);
+                            }
+                        }
+                        if ($flag != false) {
+                            $uid = $evalue['user_id'];
+                            break;
+                        }
+                    }
+                    foreach ($res as $key => $value) {
+                        if ($value['author_id'] != $uid) {
+                            unset($res[$key]);
+                        }
+                    }
+                }
+            }
+            $c = count($res);
+            $i=0;
+            foreach ($res as $key => $value) {
+                if ($i < $llim || $i >= $rlim) {
+                    $res[$key] = null;
+                }
+                $i++;
+            }
+            foreach ($res as $key => $value) {
+                if (is_null($value)) {
+                    unset($res[$key]);
+                }
+            }
+            // Количество статей
+            $articles_count = $c;
             if (!$res) {
                 echo json_encode(['status' => false, "message" => "Не нашлось ни одной подходящей статьи"]);
             } else {

@@ -88,6 +88,20 @@ class Agents {
         // В начале файла есть комент с алгоритмом использование
     }
 
+    checkAccess() {
+        // Мы должны быть авторизованы в роли администратора, профкома или кадровика
+        if (!this.state.auth) {
+            this.message.printMessage("Вы не вошли в систему");
+            return false;
+        }
+        if (this.state.auth.role === "Сотрудник" ||
+            this.state.auth.role === "Гость") {
+            this.message.printMessage("У вас нет доступа к этой странице. Пожалуйста, перестаньте копаться в коде и искать обходные пути");
+            return false;
+        }
+        return true;
+    }
+
     checkURL() {
 
         let url = '/' + this.state.url.split('/')[1].split('?')[0];
@@ -97,10 +111,8 @@ class Agents {
         }
         switch (url) {
             case "/add":
-                if (!this.state.auth) break;
-                if (this.state.auth.role === "Профком") break;
-
                 let add = new Add(this, id);
+                if (!add.checkAccess()) break;
                 this.render(add.getContent());
                 return;
             case "/agents":
@@ -277,7 +289,9 @@ class Agents {
     }
 
     getContent() {
-        return this.self;
+        if (this.checkAccess()) {
+            return this.self;
+        }
     }
 
     render(content) {

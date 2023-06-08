@@ -386,8 +386,24 @@ footer a, footer p {
 
 .grade_con {
     display: flex;
+    flex-wrap: wrap;
+
+    padding: 0 20px 20px;
+}
+
+.article_info {
+    width: 100%;
 
     padding: 20px;
+    font-size: 12px;
+}
+
+.article_date, .article_author {
+    color: #7a7a7a;
+}
+
+.article_author {
+    margin-right: 20px;
 }
 
 .grade_con button {
